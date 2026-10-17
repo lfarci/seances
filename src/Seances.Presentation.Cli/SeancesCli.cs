@@ -145,5 +145,5 @@ internal static class SeancesCli
 
         collect fetches and prints UGC schedules without changing the saved snapshot.
         refresh publishes a complete schedule snapshot; set SEANCES_SNAPSHOT_PATH to change its path.
-        """);how
+        """);
 }
