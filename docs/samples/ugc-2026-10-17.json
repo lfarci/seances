@@ -1,0 +1,95 @@
+{
+  "observedAt": "2026-10-16T17:14:28.822566+00:00",
+  "purpose": "Discovery sample of public schedule facts; not a complete production dataset",
+  "serviceDate": "2026-10-17",
+  "summaries": [
+    {
+      "cinemaId": "2",
+      "screenings": 60,
+      "missingRooms": 0,
+      "missingSourceFinishes": 0,
+      "missingFilmRuntimes": 0
+    },
+    {
+      "cinemaId": "1",
+      "screenings": 71,
+      "missingRooms": 4,
+      "missingSourceFinishes": 0,
+      "missingFilmRuntimes": 0
+    }
+  ],
+  "sampleScreenings": [
+    {
+      "id": "ugc:320021168843",
+      "filmId": "ugc:10413",
+      "title": "ENGLOUTI",
+      "cinemaId": "2",
+      "room": "Salle 11",
+      "startsAt": "2026-10-17T22:00:00+02:00",
+      "sourceReportedEndsAt": "2026-10-18T00:06:00+02:00",
+      "runtimeMinutes": 106,
+      "versionLabel": "VOstBIL",
+      "bookingUrl": "https://www.ugc.be/reservationSeances.html?id=320021168843"
+    },
+    {
+      "id": "ugc:320021168497",
+      "filmId": "ugc:10418",
+      "title": "MOCHY",
+      "cinemaId": "2",
+      "room": "Salle 5",
+      "startsAt": "2026-10-17T11:00:00+02:00",
+      "sourceReportedEndsAt": "2026-10-17T12:45:00+02:00",
+      "runtimeMinutes": 85,
+      "versionLabel": "VF",
+      "bookingUrl": "https://www.ugc.be/reservationSeances.html?id=320021168497"
+    },
+    {
+      "id": "ugc:320021168606",
+      "filmId": "ugc:10418",
+      "title": "MOCHY",
+      "cinemaId": "2",
+      "room": "Salle 5",
+      "startsAt": "2026-10-17T13:10:00+02:00",
+      "sourceReportedEndsAt": "2026-10-17T14:55:00+02:00",
+      "runtimeMinutes": 85,
+      "versionLabel": "VF",
+      "bookingUrl": "https://www.ugc.be/reservationSeances.html?id=320021168606"
+    },
+    {
+      "id": "ugc:320011212970",
+      "filmId": "ugc:10263",
+      "title": "LES MISERABLES",
+      "cinemaId": "1",
+      "room": null,
+      "startsAt": "2026-10-17T13:00:00+02:00",
+      "sourceReportedEndsAt": "2026-10-17T16:19:00+02:00",
+      "runtimeMinutes": 179,
+      "versionLabel": "VFstNL",
+      "bookingUrl": "https://www.ugc.be/reservationSeances.html?id=320011212970"
+    },
+    {
+      "id": "ugc:320011212924",
+      "filmId": "ugc:10341",
+      "title": "PRESSURE",
+      "cinemaId": "1",
+      "room": "Salle 3",
+      "startsAt": "2026-10-17T22:00:00+02:00",
+      "sourceReportedEndsAt": "2026-10-18T00:00:00+02:00",
+      "runtimeMinutes": 100,
+      "versionLabel": "VOstBIL",
+      "bookingUrl": "https://www.ugc.be/reservationSeances.html?id=320011212924"
+    },
+    {
+      "id": "ugc:320011212729",
+      "filmId": "ugc:10417",
+      "title": "LE CORSET",
+      "cinemaId": "1",
+      "room": "Salle 9",
+      "startsAt": "2026-10-17T10:30:00+02:00",
+      "sourceReportedEndsAt": "2026-10-17T12:20:00+02:00",
+      "runtimeMinutes": 90,
+      "versionLabel": "VFstNL",
+      "bookingUrl": "https://www.ugc.be/reservationSeances.html?id=320011212729"
+    }
+  ]
+}
