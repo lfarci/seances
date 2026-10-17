@@ -23,7 +23,7 @@ The application supports two entry modes: serve the website, or run a refresh an
 - Identity: managed identity for Blob access, with read access for the web app and write access for the job.
 - Deployment: public source, container build and deployment workflow. Use a suitable public registry rather than automatically adding a paid Azure registry.
 
-The .NET SDK is not installed in the current workspace; no SDK installation or cloud provisioning has occurred.
+`Seances.Web` hosts the UI and startup. `Seances.Application` coordinates refresh workflows, `Seances.Data.Collection` owns UGC collection and source mapping, `Seances.Data.Storage` owns local snapshot persistence, and `Seances.Domain` owns internal models and scheduling rules. UGC response DTOs and versioned snapshot-file DTOs are mapped at those boundaries. This split keeps local development self-contained; cloud provisioning remains a separate deployment step.
 
 ## Blazor rendering behavior
 

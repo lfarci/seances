@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Seances.Domain/Seances.Domain.csproj" />
+    <ProjectReference Include="../Seances.Application/Seances.Application.csproj" />
+    <ProjectReference Include="../Seances.Data.Collection/Seances.Data.Collection.csproj" />
+    <ProjectReference Include="../Seances.Data.Storage/Seances.Data.Storage.csproj" />
+  </ItemGroup>
+</Project>

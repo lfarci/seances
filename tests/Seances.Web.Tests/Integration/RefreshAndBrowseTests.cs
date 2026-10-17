@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Seances.Collection;
-using Seances.Domain;
-using Seances.Storage;
+using Seances.Application;
+using Seances.Data.Collection;
+using Seances.Data.Storage;
 using Xunit;
 
-namespace Seances.IntegrationTests;
+namespace Seances.Web.Tests.Integration;
 
 public sealed class RefreshAndBrowseTests
 {
@@ -83,9 +83,9 @@ public sealed class RefreshAndBrowseTests
         {
             await RefreshFixtureSnapshotAsync(snapshotPath);
             var original = await File.ReadAllBytesAsync(snapshotPath);
-            var refresher = CreateRefresher(snapshotPath);
+            var refreshService = CreateRefreshService(snapshotPath);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => refresher.RefreshAsync(emptyFixtures, DateOnly.Parse("2026-10-17")));
+            await Assert.ThrowsAsync<InvalidDataException>(() => refreshService.RefreshAsync(emptyFixtures, DateOnly.Parse("2026-10-17")));
 
             Assert.Equal(original, await File.ReadAllBytesAsync(snapshotPath));
             Assert.NotNull(await new LocalSnapshotStore(snapshotPath).ReadAsync());
@@ -113,38 +113,6 @@ public sealed class RefreshAndBrowseTests
         }
     }
 
-    [Fact]
-    public void Finish_uses_film_runtime_and_configured_allowance_when_available()
-    {
-        var start = DateTimeOffset.Parse("2026-10-17T18:00:00Z");
-        var finish = SchedulePolicy.Finish(ScreeningAt(start), new Film("film", "Film", 100, "fixture"), 20);
-
-        Assert.Equal(start.AddMinutes(120), finish.At);
-        Assert.Equal(FinishBasis.RuntimeEstimate, finish.Basis);
-        Assert.Null(finish.Label);
-    }
-
-    [Fact]
-    public void Finish_assumes_three_hours_when_runtime_is_missing()
-    {
-        var start = DateTimeOffset.Parse("2026-10-17T18:00:00Z");
-        var finish = SchedulePolicy.Finish(ScreeningAt(start), new Film("film", "Film", null, "unavailable"), 15);
-
-        Assert.Equal(start.AddMinutes(195), finish.At);
-        Assert.Equal(FinishBasis.AssumedRuntime, finish.Basis);
-        Assert.Equal("duration unknown · 3h assumed", finish.Label);
-    }
-
-    [Fact]
-    public void Finish_prefers_the_source_reported_estimate()
-    {
-        var reported = DateTimeOffset.Parse("2026-10-17T21:30:00Z");
-        var finish = SchedulePolicy.Finish(ScreeningAt(DateTimeOffset.Parse("2026-10-17T18:00:00Z"), reported), new Film("film", "Film", 100, "fixture"), 20);
-
-        Assert.Equal(reported, finish.At);
-        Assert.Equal(FinishBasis.SourceReportedEstimate, finish.Basis);
-    }
-
     private static string CreateTemporaryDirectory()
     {
         var directory = Path.Combine(Path.GetTempPath(), "seances-tests", Guid.NewGuid().ToString("N"));
@@ -155,20 +123,11 @@ public sealed class RefreshAndBrowseTests
     private static async Task<Seances.Domain.ScheduleSnapshot?> RefreshFixtureSnapshotAsync(string snapshotPath)
     {
         var store = new LocalSnapshotStore(snapshotPath);
-        await CreateRefresher(snapshotPath).RefreshAsync(Path.Combine(AppContext.BaseDirectory, "Fixtures"), DateOnly.Parse("2026-10-17"));
+        await CreateRefreshService(snapshotPath).RefreshAsync(Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"), DateOnly.Parse("2026-10-17"));
         return await store.ReadAsync();
     }
 
-    private static ScheduleRefresher CreateRefresher(string snapshotPath) =>
+    private static ScheduleRefreshService CreateRefreshService(string snapshotPath) =>
         new(new UgcAdapter(new HttpClient(new NeverRequestHandler()), TimeProvider.System), new LocalSnapshotStore(snapshotPath), TimeProvider.System);
 
-    private static Screening ScreeningAt(DateTimeOffset start, DateTimeOffset? reportedFinish = null) =>
-        new("screening", "1", "film", DateOnly.FromDateTime(start.UtcDateTime), start, reportedFinish, null, "Original", null,
-            null, "https://www.ugc.be/showings", start, null);
-
-    private sealed class NeverRequestHandler : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            throw new InvalidOperationException("Fixture refresh must not perform network requests.");
-    }
 }
