@@ -5,13 +5,13 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Web", "src\Seances.Web\Seances.Web.csproj", "{24ED7357-095F-48EB-9BFC-0D8A3599CBB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Presentation.Web", "src\Seances.Presentation.Web\Seances.Presentation.Web.csproj", "{24ED7357-095F-48EB-9BFC-0D8A3599CBB4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Domain", "src\Seances.Domain\Seances.Domain.csproj", "{ED8D689E-FAAB-4733-B7CA-C76DB567AC98}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Web.Tests", "tests\Seances.Web.Tests\Seances.Web.Tests.csproj", "{417FE2A4-6705-4580-9501-B2D9C2641029}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Presentation.Web.Tests", "tests\Seances.Presentation.Web.Tests\Seances.Presentation.Web.Tests.csproj", "{417FE2A4-6705-4580-9501-B2D9C2641029}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Domain.Tests", "tests\Seances.Domain.Tests\Seances.Domain.Tests.csproj", "{393B5D5D-6F8F-4F30-853F-4938889A2AEC}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Data.Collection.Tests", "tests\Seances.Data.Collection.Tests\Seances.Data.Collection.Tests.csproj", "{82062BB1-6D8A-4A08-A677-D8A0D5D7AE0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Data.Storage.Tests", "tests\Seances.Data.Storage.Tests\Seances.Data.Storage.Tests.csproj", "{02D51FE9-DB7D-44A7-836F-842519B8F5BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seances.Presentation.Cli", "src\Seances.Presentation.Cli\Seances.Presentation.Cli.csproj", "{657241D4-5A87-413A-AD21-60E3BDE2A33F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,6 +145,18 @@ Global
 		{02D51FE9-DB7D-44A7-836F-842519B8F5BA}.Release|x64.Build.0 = Release|Any CPU
 		{02D51FE9-DB7D-44A7-836F-842519B8F5BA}.Release|x86.ActiveCfg = Release|Any CPU
 		{02D51FE9-DB7D-44A7-836F-842519B8F5BA}.Release|x86.Build.0 = Release|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Debug|x64.Build.0 = Debug|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Debug|x86.Build.0 = Debug|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Release|x64.ActiveCfg = Release|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Release|x64.Build.0 = Release|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Release|x86.ActiveCfg = Release|Any CPU
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,5 +171,6 @@ Global
 		{8C4CC590-6B68-4245-8097-B520C98716E4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{82062BB1-6D8A-4A08-A677-D8A0D5D7AE0C} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{02D51FE9-DB7D-44A7-836F-842519B8F5BA} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{657241D4-5A87-413A-AD21-60E3BDE2A33F} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

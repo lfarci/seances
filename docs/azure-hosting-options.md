@@ -13,14 +13,14 @@ Recommend evaluating one Blazor Web App using static SSR and one container image
 ```text
 Browser -> Container App (Blazor SSR) -> Blob Storage JSON snapshot
 
-Scheduled Container Apps Job (same image, refresh command)
+Scheduled Container Apps Job (same image, Seances.Presentation.Cli refresh command)
   -> UGC public pages and fragments
   -> parse and validate
   -> replace Blob snapshot after success
 ```
 
 - Server-rendered Razor components render the timetable and simplified list; use normal GET/query parameters for filters and a little browser JavaScript for saved settings and interaction where needed.
-- Keep collection and rendering in the same repository/project. A command argument selects web-serving or one-off refresh mode; this is a packaging choice, not a separate API or frontend application.
+- Keep collection and rendering in the same repository, with `Seances.Presentation.Web` serving snapshots and `Seances.Presentation.Cli` handling one-off or scheduled refreshes.
 - The web process reads the snapshot with a short in-memory cache; visitor requests do not trigger UGC scraping.
 - Blob Storage supplies persistence across container restarts and scale-to-zero. There is no need for a relational database initially.
 - A scheduled job runs independently of website traffic, using the same collection code. Do not rely on a timer inside a web app that scales to zero.

@@ -10,7 +10,7 @@ using Seances.Data.Collection;
 using Seances.Data.Storage;
 using Xunit;
 
-namespace Seances.Web.Tests.Integration;
+namespace Seances.Presentation.Web.Tests.Integration;
 
 public sealed class RefreshAndBrowseTests
 {

@@ -1,4 +1,4 @@
-namespace Seances.Web.Tests.Integration;
+namespace Seances.Presentation.Web.Tests.Integration;
 
 internal sealed class NeverRequestHandler : HttpMessageHandler
 {

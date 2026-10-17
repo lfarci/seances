@@ -2,5 +2,5 @@
 **/obj/
 .vs/
 *.user
-src/Seances.Web/data/
+src/Seances.Presentation.Web/data/
 *.suo

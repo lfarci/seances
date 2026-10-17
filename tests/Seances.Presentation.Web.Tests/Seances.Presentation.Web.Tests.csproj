@@ -13,7 +13,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Seances.Web/Seances.Web.csproj" />
+    <ProjectReference Include="../../src/Seances.Presentation.Web/Seances.Presentation.Web.csproj" />
+    <ProjectReference Include="../../src/Seances.Application/Seances.Application.csproj" />
+    <ProjectReference Include="../../src/Seances.Data.Collection/Seances.Data.Collection.csproj" />
+    <ProjectReference Include="../../src/Seances.Data.Storage/Seances.Data.Storage.csproj" />
     <None Update="Integration/Fixtures/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
