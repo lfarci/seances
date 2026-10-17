@@ -10,7 +10,8 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
     private const string DeBrouckereCinemaId = "2";
     private const string ToisonDorCinemaId = "1";
     private const string OfficialSiteBaseUrl = "https://www.ugc.be";
-    private const string CinemaIndexUrl = OfficialSiteBaseUrl + "/cinemas.html";
+    private const string BrusselsRegionId = "1";
+    private const string CinemaListUrl = OfficialSiteBaseUrl + "/cinemasAjaxAction!getCinemasList.action?id=" + BrusselsRegionId + "&latitude=&longitude=";
     private const string FragmentEndpoint = OfficialSiteBaseUrl + "/showingsCinemaAjaxAction!getShowingsForCinemaPage.action";
     private const string PageParameter = "30007";
     private const string SourceTimeZoneId = "Europe/Brussels";
@@ -27,15 +28,15 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
     public async Task<IReadOnlyList<UgcScheduleDateDto>> CollectAsync(CancellationToken cancellationToken, DateOnly? requestedDate = null)
     {
         var results = new List<UgcScheduleDateDto>();
-        var indexHtml = await GetAsync(CinemaIndexUrl, cancellationToken);
-        var index = new HtmlParser().ParseDocument(indexHtml);
+        var cinemaListHtml = await GetAsync(CinemaListUrl, cancellationToken);
+        var cinemaList = new HtmlParser().ParseDocument(cinemaListHtml);
         foreach (var cinema in Cinemas)
         {
             var place = cinema.Id == DeBrouckereCinemaId ? "brouck" : "toison";
-            var cinemaLink = index.QuerySelectorAll("a[href]").FirstOrDefault(link =>
+            var cinemaLink = cinemaList.QuerySelectorAll("a[href]").FirstOrDefault(link =>
                 (link.TextContent + " " + link.GetAttribute("href")).Contains(place, StringComparison.OrdinalIgnoreCase));
-            if (cinemaLink?.GetAttribute("href") is not { } href) throw new InvalidDataException($"Could not discover the UGC page for {cinema.Name} from the cinema index.");
-            var pageUrl = new Uri(new Uri(CinemaIndexUrl), href).ToString();
+            if (cinemaLink?.GetAttribute("href") is not { } href) throw new InvalidDataException($"Could not discover the UGC page for {cinema.Name} from the cinema list.");
+            var pageUrl = new Uri(new Uri(OfficialSiteBaseUrl), href).ToString();
             var page = await GetAsync(pageUrl, cancellationToken);
             var dates = FindDates(page);
             if (dates.Count == 0) throw new InvalidDataException($"No published dates found for {cinema.Name}.");
@@ -63,7 +64,9 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
             var explicitlyEmpty = document.QuerySelector(".no-showings, .no-screenings, [data-empty='true']") is not null ||
                 content.Contains("aucune séance", StringComparison.OrdinalIgnoreCase) ||
                 content.Contains("aucune seance", StringComparison.OrdinalIgnoreCase) ||
-                content.Contains("no screenings", StringComparison.OrdinalIgnoreCase);
+                content.Contains("no screenings", StringComparison.OrdinalIgnoreCase) ||
+                content.Contains("prochaine séance le", StringComparison.OrdinalIgnoreCase) ||
+                content.Contains("prochaine seance le", StringComparison.OrdinalIgnoreCase);
             if (!explicitlyEmpty) throw new InvalidDataException("UGC returned an empty or unrecognized screening fragment.");
         }
 
@@ -72,24 +75,27 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
         foreach (var button in document.QuerySelectorAll("button[data-showing]"))
         {
             var screeningId = Attribute(button, "data-showing", "data-showing-id", "data-seance-id");
-            var filmId = Attribute(button, "data-film", "data-film-id", "data-id-film");
+            var sourceFilmId = Attribute(button, "data-film-id", "data-filmid", "data-id-film");
+            var filmId = sourceFilmId ?? Attribute(button, "data-film");
+            var filmBlock = button.Closest("[id*='bloc-showing-film'], [class*='bloc-showing-film']");
             var title = Attribute(button, "data-title", "data-film-title") ??
-                button.Closest("[class*='bloc-showing-film']")?.QuerySelector(".title-film, .film-title, h2, h3")?.TextContent.Trim();
-            var cinemaSourceId = Attribute(button, "data-cinema", "data-cinema-id");
-            var dateValue = Attribute(button, "data-date");
-            var timeValue = Attribute(button, "data-time", "data-start", "data-start-time");
+                filmBlock?.QuerySelector(".title-film, .film-title, .block--title a, h2, h3")?.TextContent.Trim() ??
+                (sourceFilmId is null ? null : Attribute(button, "data-film"));
+            var cinemaSourceId = Attribute(button, "data-cinema-id", "data-cinemaid", "data-id-cinema") ?? Attribute(button, "data-cinema");
+            var dateValue = Attribute(button, "data-date", "data-seancedate");
+            var timeValue = Attribute(button, "data-time", "data-start", "data-start-time", "data-seancehour") ??
+                button.QuerySelector(".screening-time-start")?.TextContent.Trim();
             var version = Attribute(button, "data-version", "data-language", "data-label") ??
                 button.QuerySelector(".screening-version, .screening-language, [class*='version']")?.TextContent;
             if (string.IsNullOrWhiteSpace(screeningId) || string.IsNullOrWhiteSpace(filmId) || string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(cinemaSourceId) || string.IsNullOrWhiteSpace(dateValue) || string.IsNullOrWhiteSpace(timeValue) || string.IsNullOrWhiteSpace(version))
                 throw new InvalidDataException("A screening button is missing a required source field.");
             if (!cinemaSourceId.Equals(context.CinemaId, StringComparison.Ordinal)) throw new InvalidDataException($"Screening {screeningId} belongs to unexpected cinema {cinemaSourceId}.");
-            if (!DateOnly.TryParseExact(dateValue, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var serviceDate) || serviceDate != context.ServiceDate)
+            if (!TryParseServiceDate(dateValue, out var serviceDate) || serviceDate != context.ServiceDate)
                 throw new InvalidDataException($"Invalid or unexpected service date '{dateValue}' for screening {screeningId}.");
             if (!TimeOnly.TryParse(timeValue, CultureInfo.InvariantCulture, out var startTime))
                 throw new InvalidDataException($"Invalid start time '{timeValue}' for screening {screeningId}.");
             var start = ResolveLocal(serviceDate, startTime);
-            var block = button.Closest("[class*='bloc-showing-film']");
-            var runtime = ParseRuntime(block);
+            var runtime = ParseRuntime(filmBlock);
             films.TryAdd(filmId, new UgcFilmDto(filmId, title, runtime, runtime is null ? "unavailable from source" : "UGC film block"));
             var finishText = button.QuerySelector(".screening-time-end")?.TextContent.Trim();
             var finish = finishText is null ? null : ResolveFinish(serviceDate, startTime, finishText);
@@ -129,6 +135,9 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
         return values.Select(value => DateOnly.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture)).Order().ToList();
     }
 
+    private static bool TryParseServiceDate(string value, out DateOnly serviceDate) =>
+        DateOnly.TryParseExact(value, ["yyyy-MM-dd", "dd/MM/yyyy"], CultureInfo.InvariantCulture, DateTimeStyles.None, out serviceDate);
+
     private static DateTimeOffset ResolveLocal(DateOnly date, TimeOnly time)
     {
         var zone = TimeZoneInfo.FindSystemTimeZoneById(SourceTimeZoneId);
@@ -140,7 +149,8 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
 
     private static DateTimeOffset? ResolveFinish(DateOnly date, TimeOnly start, string finishText)
     {
-        if (!TimeOnly.TryParse(finishText, CultureInfo.InvariantCulture, out var finish))
+        var match = Regex.Match(finishText, @"\d{1,2}:\d{2}");
+        if (!TimeOnly.TryParse(match.Value, CultureInfo.InvariantCulture, out var finish))
             throw new InvalidDataException($"Invalid source finish time '{finishText}'.");
         var finishDate = finish < start ? date.AddDays(1) : date;
         return ResolveLocal(finishDate, finish);
@@ -151,9 +161,11 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
     private static Uri? ParseBookingUrl(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
-        var match = Regex.Match(value, """(?:https?://[^'"\s]+)?/reservationSeances\.html\?id=\d+""");
+        var match = Regex.Match(value, """(?:https?://[^'"\s]+)?/?reservationSeances\.html\?id=\d+""");
         if (!match.Success) return null;
-        var absolute = match.Value.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? match.Value : OfficialSiteBaseUrl + match.Value;
+        var absolute = match.Value.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            ? match.Value
+            : OfficialSiteBaseUrl + "/" + match.Value.TrimStart('/');
         return Uri.TryCreate(absolute, UriKind.Absolute, out var uri) ? uri : null;
     }
 

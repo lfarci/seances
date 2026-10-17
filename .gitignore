@@ -2,4 +2,5 @@
 **/obj/
 .vs/
 *.user
+src/Seances.Web/data/
 *.suo
