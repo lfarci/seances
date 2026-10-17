@@ -49,7 +49,7 @@
                 }
             </section>
         }
-        @{ var schedule = _snapshot.Screenings.Where(item => item.ServiceDate == date && covered.Any(day => day.CinemaId == item.CinemaId)).OrderBy(item => item.StartsAt).ToArray(); }
+        var schedule = _snapshot.Screenings.Where(item => item.ServiceDate == date && covered.Any(day => day.CinemaId == item.CinemaId)).OrderBy(item => item.StartsAt).ToArray();
         @if (schedule.Length == 0 && covered.Length > 0)
         {
             <p>No screenings were listed in the successful check.</p>
