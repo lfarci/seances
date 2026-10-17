@@ -1,0 +1,9 @@
+{
+  "cinemaId": "2",
+  "cinemaName": "UGC De Brouckère",
+  "address": "Place De Brouckère 38, 1000 Bruxelles",
+  "serviceDate": "2026-10-17",
+  "sourceUrl": "https://www.ugc.be/showingsCinemaAjaxAction!getShowingsForCinemaPage.action?cinemaId=2&date=2026-10-17&page=30007",
+  "fetchedAt": "2026-10-16T17:14:28.822566+00:00",
+  "fixtureKind": "synthetic parser case based on the documented source structure"
+}

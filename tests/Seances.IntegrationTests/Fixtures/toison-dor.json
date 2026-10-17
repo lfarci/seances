@@ -1,0 +1,9 @@
+{
+  "cinemaId": "1",
+  "cinemaName": "UGC Toison d’Or",
+  "address": "Avenue de la Toison d’Or 8 et 17, 1050 Bruxelles",
+  "serviceDate": "2026-10-17",
+  "sourceUrl": "https://www.ugc.be/showingsCinemaAjaxAction!getShowingsForCinemaPage.action?cinemaId=1&date=2026-10-17&page=30007",
+  "fetchedAt": "2026-10-16T17:14:28.822566+00:00",
+  "fixtureKind": "synthetic parser case based on the documented source structure"
+}

@@ -72,3 +72,9 @@ The inspected examples' finish spans equal film runtime plus 20 minutes. Treat d
 - Metadata coverage, film matching, and access requirements.
 
 Search-indexed evidence is discovery evidence only; do not use search results as the production showtime feed.
+
+## Implementation status (2026-10-17)
+
+The checkout did not contain captured raw fragment responses. The integration fixtures are synthetic parser cases with their source URL, service date, and fixture provenance in adjacent JSON files. They cover both cinemas, duplicate IDs, an unavailable room, an upcoming film without a screening button, a sold-out label, an event, and a finish after midnight. They do not establish that every current UGC attribute or selector matches the live response.
+
+The current `robots.txt` could not be read from the implementation environment. No live UGC collection was performed. The refresh command therefore requires `--allow-live`; recheck current directives and source terms before using that option, then record one bounded check and retain the actual response with its fetch provenance.

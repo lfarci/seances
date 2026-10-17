@@ -1,0 +1,127 @@
+@page "/"
+@using Seances.Domain
+@using Seances.Storage
+@using System.Globalization
+@inject LocalSnapshotStore SnapshotStore
+@inject IConfiguration Configuration
+@inject NavigationManager Navigation
+
+<main>
+    <header>
+        <p class="eyebrow">BRUSSELS · UGC</p>
+        <h1>Find your next film.</h1>
+        <p class="intro">Upcoming screenings at De Brouckère and Toison d’Or.</p>
+    </header>
+
+    @if (_snapshot is null)
+    {
+        <section class="notice" role="status"><h2>Schedule unavailable</h2><p>No successful local refresh is available yet.</p></section>
+    }
+    else
+    {
+        var date = SelectedDate(_snapshot);
+        var covered = _snapshot.PublishedDates.Where(item => item.Date == date).ToArray();
+        <form method="get" class="date-picker">
+            <label for="date">Service date</label>
+            <select id="date" name="date" value="@date.ToString("yyyy-MM-dd")">
+                @foreach (var choice in _snapshot.PublishedDates.Select(item => item.Date).Distinct().Order())
+                {
+                    <option value="@choice.ToString("yyyy-MM-dd")" selected="@(choice == date)">@choice.ToString("ddd, d MMM", CultureInfo.GetCultureInfo("en-GB"))</option>
+                }
+            </select>
+            <button type="submit">Show date</button>
+        </form>
+
+        <p class="freshness">Last successful check: @BrusselsDateTime(_snapshot.CheckedAt) Brussels time</p>
+        @if (DateTimeOffset.UtcNow - _snapshot.CheckedAt > TimeSpan.FromHours(36))
+        {
+            <p class="notice" role="status">This schedule may be out of date.</p>
+        }
+        @foreach (var cinema in _snapshot.Cinemas)
+        {
+            var coverage = covered.FirstOrDefault(item => item.CinemaId == cinema.Id);
+            <section class="cinema" aria-labelledby="cinema-@cinema.Id">
+                <h2 id="cinema-@cinema.Id">@cinema.Name</h2>
+                <p class="address">@cinema.Address</p>
+                @if (coverage is null)
+                {
+                    <p class="notice" role="status">Programme not published for this date.</p>
+                }
+            </section>
+        }
+        @{ var schedule = _snapshot.Screenings.Where(item => item.ServiceDate == date && covered.Any(day => day.CinemaId == item.CinemaId)).OrderBy(item => item.StartsAt).ToArray(); }
+        @if (schedule.Length == 0 && covered.Length > 0)
+        {
+            <p>No screenings were listed in the successful check.</p>
+        }
+        else if (schedule.Length > 0)
+        {
+            <ol class="screenings" aria-label="Screenings in chronological order">
+                @foreach (var screening in schedule)
+                {
+                    var film = _snapshot.Films.First(item => item.Id == screening.FilmId);
+                    var cinema = _snapshot.Cinemas.First(item => item.Id == screening.CinemaId);
+                    var allowance = AllowanceFor(cinema.Id);
+                    var finish = SchedulePolicy.Finish(screening, film, allowance);
+                    <li>
+                        <article>
+                            <p class="start"><time datetime="@screening.StartsAt.ToString("O")">@Brussels(screening.StartsAt)</time></p>
+                            <h3>@film.Title</h3>
+                            <p class="meta">@cinema.Name · @screening.VersionLabel@if (!string.IsNullOrWhiteSpace(screening.Format)) { <span> · @screening.Format</span> }</p>
+                            @if (screening.SourceStatus is not null) { <p class="meta">UGC status: @screening.SourceStatus</p> }
+                            <details>
+                                <summary>Screening details</summary>
+                                <dl>
+                                    <dt>Cinema</dt><dd>@cinema.Name</dd>
+                                    <dt>Starts</dt><dd>@Brussels(screening.StartsAt)</dd>
+                                    <dt>Version</dt><dd>@screening.VersionLabel</dd>
+                                    <dt>Format</dt><dd>@(screening.Format ?? "Unavailable")</dd>
+                                    <dt>Room</dt><dd>@(screening.Room ?? "Room unavailable")</dd>
+                                    <dt>Runtime</dt><dd>@(film.RuntimeMinutes is { } runtime ? $"{runtime} minutes" : "Runtime unavailable") · @film.RuntimeProvenance</dd>
+                                    <dt>Finish</dt><dd>@BrusselsFinish(finish.At, screening.ServiceDate) · @FinishLabel(finish.Basis, allowance)@if (finish.Label is not null) { <span> · @finish.Label</span> }</dd>
+                                </dl>
+                                @if (screening.BookingUrl is not null)
+                                {
+                                    <a href="@screening.BookingUrl" rel="external">Book with UGC</a>
+                                }
+                                else
+                                {
+                                    <p>Booking link unavailable.</p>
+                                }
+                            </details>
+                        </article>
+                    </li>
+                }
+            </ol>
+        }
+    }
+</main>
+
+@code {
+    private ScheduleSnapshot? _snapshot;
+    protected override async Task OnInitializedAsync() => _snapshot = await SnapshotStore.ReadAsync();
+    private DateOnly SelectedDate(ScheduleSnapshot snapshot)
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels")).DateTime);
+        return query.TryGetValue("date", out var value) && DateOnly.TryParse(value.ToString(), out var parsed) ? parsed : today;
+    }
+    private static string Brussels(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels")).ToString("HH:mm");
+    private static string BrusselsDateTime(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels")).ToString("ddd d MMM, HH:mm", CultureInfo.GetCultureInfo("en-GB"));
+    private static string BrusselsFinish(DateTimeOffset instant, DateOnly serviceDate)
+    {
+        var local = TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels"));
+        return DateOnly.FromDateTime(local.DateTime) == serviceDate ? local.ToString("HH:mm", CultureInfo.GetCultureInfo("en-GB")) : local.ToString("ddd d MMM, HH:mm", CultureInfo.GetCultureInfo("en-GB"));
+    }
+    private int AllowanceFor(string cinemaId)
+    {
+        var configured = Configuration[$"Schedule:Allowances:{cinemaId}"];
+        return int.TryParse(configured, out var minutes) && minutes >= 0 ? minutes : 20;
+    }
+    private static string FinishLabel(FinishBasis basis, int allowance) => basis switch
+    {
+        FinishBasis.SourceReportedEstimate => "source-reported estimate · not a guaranteed exit time",
+        FinishBasis.RuntimeEstimate => $"runtime estimate + {allowance}-minute allowance",
+        _ => $"assumed runtime + {allowance}-minute allowance"
+    };
+}
