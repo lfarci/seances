@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Seances.Application;
 using Seances.Data.Collection;
 using Seances.Data.Storage;
+using Seances.Domain;
 using Xunit;
 
 namespace Seances.Presentation.Web.Tests.Integration;
@@ -106,6 +107,44 @@ public sealed class RefreshAndBrowseTests
             await File.WriteAllTextAsync(snapshotPath, "{ definitely not valid JSON");
 
             Assert.Null(await new LocalSnapshotStore(snapshotPath).ReadAsync());
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Home_page_uses_next_published_date_when_today_is_absent()
+    {
+        var temporaryDirectory = CreateTemporaryDirectory();
+        var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById(Cinema.BrusselsTimeZoneId)).DateTime);
+        var nextDate = today.AddDays(1);
+        var checkedAt = DateTimeOffset.UtcNow;
+        const string sourceUrl = "https://www.ugc.be/showings";
+        var snapshot = new ScheduleSnapshot(checkedAt, "UGC",
+            [new Cinema("1", "UGC Toison d’Or", "Brussels", Cinema.BrusselsTimeZoneId),
+             new Cinema("2", "UGC De Brouckère", "Brussels", Cinema.BrusselsTimeZoneId)],
+            [new PublishedDate("1", nextDate, sourceUrl, checkedAt, 0),
+             new PublishedDate("2", nextDate, sourceUrl, checkedAt, 0)],
+            [], []);
+        try
+        {
+            await new LocalSnapshotStore(snapshotPath).PublishAsync(snapshot);
+            await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll<LocalSnapshotStore>();
+                    services.AddSingleton(new LocalSnapshotStore(snapshotPath));
+                }));
+            using var client = factory.CreateClient();
+
+            var page = await client.GetStringAsync("/");
+
+            Assert.Contains("No screenings were listed in the successful check.", page);
+            Assert.DoesNotContain("Programme not published for this date.", page);
         }
         finally
         {

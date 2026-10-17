@@ -104,7 +104,9 @@
     {
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
         var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels")).DateTime);
-        return query.TryGetValue("date", out var value) && DateOnly.TryParse(value.ToString(), out var parsed) ? parsed : today;
+        if (query.TryGetValue("date", out var value) && DateOnly.TryParse(value.ToString(), out var parsed)) return parsed;
+        var dates = snapshot.PublishedDates.Select(item => item.Date).Distinct().Order().ToArray();
+        return dates.FirstOrDefault(date => date >= today, dates.Length > 0 ? dates[^1] : today);
     }
     private static string Brussels(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels")).ToString("HH:mm");
     private static string BrusselsDateTime(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels")).ToString("ddd d MMM, HH:mm", CultureInfo.GetCultureInfo("en-GB"));

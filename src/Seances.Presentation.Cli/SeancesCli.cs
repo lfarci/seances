@@ -9,7 +9,6 @@ internal static class SeancesCli
     private const string AllowLiveFlag = "--allow-live";
     private const string DateFlag = "--date";
     private const string FixtureFlag = "--fixture";
-    private const string DefaultSnapshotPath = "data/schedule.json";
     private static readonly TimeSpan HttpTimeout = TimeSpan.FromSeconds(20);
 
     public static async Task<int> RunAsync(string[] args)
@@ -48,6 +47,7 @@ internal static class SeancesCli
             using var client = new HttpClient { Timeout = HttpTimeout };
             var collected = await new UgcAdapter(client, TimeProvider.System).CollectAsync(CancellationToken.None, requestedDate);
             PrintCollection(collected);
+            Console.WriteLine("Collection complete. Run 'refresh' to publish the schedule for the web app.");
             return 0;
         }
         catch (Exception error)
@@ -65,9 +65,9 @@ internal static class SeancesCli
             return 2;
         }
 
-        var snapshotPath = Environment.GetEnvironmentVariable("SEANCES_SNAPSHOT_PATH") ?? DefaultSnapshotPath;
         try
         {
+            var snapshotPath = LocalSnapshotStore.ResolvePath(Environment.GetEnvironmentVariable("SEANCES_SNAPSHOT_PATH"));
             using var client = new HttpClient { Timeout = HttpTimeout };
             var adapter = new UgcAdapter(client, TimeProvider.System);
             var store = new LocalSnapshotStore(snapshotPath);
@@ -138,12 +138,16 @@ internal static class SeancesCli
         return 2;
     }
 
-    private static void PrintUsage() => Console.WriteLine("""
-        Usage:
-          seances collect --allow-live [--date yyyy-MM-dd]
-          seances refresh (--allow-live | --fixture <directory>) [--date yyyy-MM-dd]
+    private static void PrintUsage()
+    {
+        Console.WriteLine("""
+            Usage:
+              seances collect --allow-live [--date yyyy-MM-dd]
+              seances refresh (--allow-live | --fixture <directory>) [--date yyyy-MM-dd]
 
-        collect fetches and prints UGC schedules without changing the saved snapshot.
-        refresh publishes a complete schedule snapshot; set SEANCES_SNAPSHOT_PATH to change its path.
-        """);
+            collect fetches and prints UGC schedules without changing the saved snapshot.
+            refresh publishes a complete schedule snapshot; set SEANCES_SNAPSHOT_PATH to an absolute path to change its location.
+            """);
+        Console.WriteLine($"Default snapshot: {LocalSnapshotStore.DefaultPath}");
+    }
 }

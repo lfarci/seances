@@ -41,7 +41,8 @@ public sealed class UgcAdapter(HttpClient http, TimeProvider clock)
             var dates = FindDates(page);
             if (dates.Count == 0) throw new InvalidDataException($"No published dates found for {cinema.Name}.");
             if (requestedDate is { } selected && !dates.Contains(selected))
-                throw new InvalidDataException($"{cinema.Name} has not published service date {selected:yyyy-MM-dd}.");
+                throw new InvalidDataException($"{cinema.Name} has not published service date {selected:yyyy-MM-dd}. " +
+                    $"Published dates: {string.Join(", ", dates.Select(date => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)))}.");
             IEnumerable<DateOnly> requestedDates = requestedDate is { } requested ? new[] { requested } : dates;
             foreach (var date in requestedDates)
             {

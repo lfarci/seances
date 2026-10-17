@@ -7,6 +7,17 @@ namespace Seances.Data.Storage;
 public sealed class LocalSnapshotStore(string path)
 {
     private const int BufferSize = 81920;
+    public static string DefaultPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Seances", "schedule.json");
+
+    public static string ResolvePath(string? configuredPath)
+    {
+        if (string.IsNullOrWhiteSpace(configuredPath)) return DefaultPath;
+        if (!Path.IsPathFullyQualified(configuredPath))
+            throw new ArgumentException("SEANCES_SNAPSHOT_PATH must be an absolute path.", nameof(configuredPath));
+        return configuredPath;
+    }
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true

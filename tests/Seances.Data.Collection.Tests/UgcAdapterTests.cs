@@ -80,4 +80,21 @@ public sealed class UgcAdapterTests
             second => Assert.Equal("1", second.CinemaId));
         Assert.Equal(5, handler.RequestCount);
     }
+
+    [Fact]
+    public async Task Unpublished_date_error_lists_dates_from_the_cinema_calendar()
+    {
+        const string cinemaList = "<a href='cinema-ugc-de-brouckere.html'>De Brouckère</a>";
+        const string calendar = "<script>initCalendarDate(['2026-10-18', '2026-10-19'])</script>";
+        var handler = new ScriptedHttpMessageHandler(
+            ("/cinemasAjaxAction!getCinemasList.action?id=1&latitude=&longitude=", cinemaList),
+            ("/cinema-ugc-de-brouckere.html", calendar));
+        using var client = new HttpClient(handler);
+        var adapter = new UgcAdapter(client, new AdvancingTimeProvider());
+
+        var error = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            adapter.CollectAsync(CancellationToken.None, new DateOnly(2026, 10, 17)));
+
+        Assert.Contains("Published dates: 2026-10-18, 2026-10-19", error.Message);
+    }
 }

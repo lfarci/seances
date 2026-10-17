@@ -1,6 +1,6 @@
 # UGC source discovery
 
-Read-only investigation, 2026-10-16. Live public fragment retrieval is now proven for both Brussels cinemas; a production collector has not been implemented.
+Initial read-only investigation, 2026-10-16. Live public fragment retrieval was proven for both Brussels cinemas; implementation findings are recorded below.
 
 ## Live findings (supersede earlier access uncertainties below)
 
@@ -80,3 +80,5 @@ The integration fixtures are synthetic parser cases with their source URL, servi
 During live-refresh troubleshooting on 2026-10-17, the current cinema index contained an empty `#nav-cinemas` container and loaded its links from `/cinemasAjaxAction!getCinemasList.action`. The returned cinema cards linked to `cinema-ugc-de-brouckere.html` and `cinema-ugc-toison-d-or.html`. Current screening fragments use `data-filmId`, `data-cinemaId`, `data-seanceHour`, and `data-seanceDate` (day/month/year); finish text includes a `(fin HH:mm)` prefix, and booking links appear in `onclick` as a relative path. Toison d’Or's fragment for 2026-10-17 had film cards with “Prochaine séance le …” text and no showing buttons, indicating no screenings for that service date.
 
 One bounded live refresh for 2026-10-17 completed successfully after the collector was updated for these formats. The same date was no longer published at De Brouckère when requested for 2026-10-16. Current `robots.txt` was read before the refresh; it disallows `/AjaxAction!`, while the observed cinema-list and screening paths begin `/cinemasAjaxAction!` and `/showingsCinemaAjaxAction!` respectively. Recheck current directives and source terms before future live collection. Raw live responses were inspected locally and are not committed; deterministic tests continue to use synthetic fixtures.
+
+Later on 2026-10-17, UGC's calendar no longer offered 2026-10-17 at De Brouckère, while both cinemas published 2026-10-19. A live CLI collection for 2026-10-19 returned 60 De Brouckère and 71 Toison d’Or screenings. A full-calendar run collected 34 cinema-date responses and 485 screenings, and a no-date refresh published the complete snapshot. The web host and CLI had resolved the relative default snapshot path from different directories; both now use the OS local application-data path unless the same absolute `SEANCES_SNAPSHOT_PATH` is configured.
