@@ -23,14 +23,10 @@ if (args.Contains("--refresh", StringComparer.Ordinal))
     }
     try
     {
-        using var services = new ServiceCollection()
-            .AddSingleton(TimeProvider.System)
-            .AddHttpClient<UgcAdapter>(client => client.Timeout = TimeSpan.FromSeconds(20))
-            .Services
-            .AddSingleton(_ => new LocalSnapshotStore(snapshotPath))
-            .AddTransient<ScheduleRefresher>()
-            .BuildServiceProvider();
-        await services.GetRequiredService<ScheduleRefresher>().RefreshAsync(fixtureDirectory, requestedDate);
+        using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+        var adapter = new UgcAdapter(client, TimeProvider.System);
+        var store = new LocalSnapshotStore(snapshotPath);
+        await new ScheduleRefresher(adapter, store, TimeProvider.System).RefreshAsync(fixtureDirectory, requestedDate);
         Console.WriteLine($"Published snapshot to {Path.GetFullPath(snapshotPath)}");
     }
     catch (Exception error)
