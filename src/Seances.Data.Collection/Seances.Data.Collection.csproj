@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.5.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Seances.Domain/Seances.Domain.csproj" />
+  </ItemGroup>
+</Project>

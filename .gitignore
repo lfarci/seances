@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+src/Seances.Presentation.Web/data/
+*.suo

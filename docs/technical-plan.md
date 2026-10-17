@@ -19,11 +19,11 @@ The application supports two entry modes: serve the website, or run a refresh an
 - Collection: built-in HttpClient plus AngleSharp for the verified HTML fragments.
 - Data: built-in System.Text.Json, one complete versioned JSON snapshot in Blob Storage. No relational database initially.
 - Hosting: Container Apps Consumption, web minimum zero/maximum one replica, single active revision. The user accepts cold starts.
-- Scheduling: Container Apps Job, same image with a refresh argument, independent of website traffic. No separate Azure Function needed.
+- Scheduling: Container Apps Job, same image running `Seances.Presentation.Cli refresh`, independent of website traffic. No separate Azure Function needed.
 - Identity: managed identity for Blob access, with read access for the web app and write access for the job.
 - Deployment: public source, container build and deployment workflow. Use a suitable public registry rather than automatically adding a paid Azure registry.
 
-The .NET SDK is not installed in the current workspace; no SDK installation or cloud provisioning has occurred.
+`Seances.Presentation.Web` hosts the UI and startup. `Seances.Presentation.Cli` provides manual collection inspection and snapshot refresh commands. `Seances.Application` coordinates refresh workflows, `Seances.Data.Collection` owns UGC collection and source mapping, `Seances.Data.Storage` owns local snapshot persistence, and `Seances.Domain` owns internal models and scheduling rules. UGC response DTOs and versioned snapshot-file DTOs are mapped at those boundaries. This split keeps local development self-contained; cloud provisioning remains a separate deployment step.
 
 ## Blazor rendering behavior
 
