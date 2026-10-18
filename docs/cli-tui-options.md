@@ -1,0 +1,24 @@
+# CLI and TUI options
+
+Research checked 18 October 2026 against the projects' own documentation, repositories, and NuGet listings.
+
+## Repository fit
+
+The CLI currently has two non-interactive commands (`collect` and `refresh`), three flags (`--allow-live`, `--date`, `--fixture`), hand-written validation/help, and plain console output. The project targets `net10.0`. `--allow-live` is an explicit safety gate, and `refresh --fixture` supports repeatable local operation. This is a small command-line interface, not a terminal application that needs a persistent screen.
+
+## Options
+
+| Option | What it provides | Current state and fit |
+| --- | --- | --- |
+| [System.CommandLine](https://learn.microsoft.com/dotnet/standard/commandline/) | Command/option parsing, invocation, standard help/version, validation, and shell completion. It is a CLI parser, not a rich UI toolkit. | Stable `2.0.13` is available and targets .NET 8+; current Microsoft docs describe the 2.x API. Strongest choice if replacing the custom argument parser. ([NuGet](https://www.nuget.org/packages/System.CommandLine/), [syntax](https://learn.microsoft.com/dotnet/standard/commandline/define-commands)) |
+| [Spectre.Console](https://spectreconsole.net/) | Rich terminal rendering, tables, status/progress, and interactive text, confirmation, single-choice, and multi-choice prompts. It works well in ordinary command output; it does not itself turn a command into a full-screen, continuously navigable TUI. | Stable `0.57.2` is available for .NET 8+; the project is active. Good fit for nicer schedule output or an optional interactive command. ([NuGet](https://www.nuget.org/packages/Spectre.Console/), [prompt docs](https://spectreconsole.net/console/prompts/selection-prompt/), [live display docs](https://spectreconsole.net/console/live/live-display/)) |
+| [Spectre.Console.Cli](https://spectreconsole.net/cli/) | Typed command tree and settings/options, with integration into the Spectre.Console ecosystem. It is the parser/command framework companion, separate from the rendering package. | Stable `0.57.2` is available; current NuGet listing also shows a separate 1.0 alpha line. A credible single-vendor choice if adopting both rich output and command routing, but more framework than this CLI currently needs. ([NuGet stable package](https://www.nuget.org/packages/Spectre.Console.Cli/), [CLI releases](https://github.com/spectreconsole/spectre.console.cli/releases)) |
+| [Cocona](https://github.com/mayuki/Cocona) | Minimal API or class-based command definitions, deriving commands and options from method parameters. CLI framework, not a TUI. | Latest published `2.2.0` dates to March 2023. Its minimal command declarations are attractive, but it is the stalest option in this comparison. ([NuGet](https://www.nuget.org/packages/Cocona/)) |
+| [ConsoleAppFramework](https://github.com/Cysharp/ConsoleAppFramework) | Source-generated command framework using methods and parameters; its project emphasizes low overhead and AOT. CLI framework, not a TUI. | Active v5 line, with current .NET support; latest package listing is `5.7.13`. A good fit when source generation, startup, or AOT matters, which this small operator CLI does not currently signal. ([GitHub](https://github.com/Cysharp/ConsoleAppFramework), [NuGet](https://www.nuget.org/packages/ConsoleAppFramework/)) |
+| [Terminal.Gui](https://gui-cs.github.io/Terminal.Gui/) | Stateful terminal UI toolkit with views, keyboard/mouse handling, and application event flow; supports both inline and full-screen app layouts. This is the option here for a real TUI. | v2.5.0 is a stable release targeting .NET 10, with active 2.5.1 development. It is the strongest actual TUI candidate here; use it if the workflow becomes a persistent schedule browser/dashboard, not just for options and nicer output. ([project documentation](https://gui-cs.github.io/Terminal.Gui/), [NuGet package/release status](https://www.nuget.org/packages/Terminal.Gui/)) |
+
+## Recommendation
+
+Do not build a full-screen TUI for the current collect/refresh workflow. Keep commands and options scriptable, particularly the live-fetch confirmation gate and fixture mode. The custom parser is small enough to keep if no new CLI features are needed; if replacing hand-written parsing/help is the goal, use stable `System.CommandLine` 2.x. Add `Spectre.Console` separately only if richer tables, progress/status, or an interactive prompt materially improve the operator experience. Reserve `Terminal.Gui` for a future long-running schedule browser or dashboard.
+
+In short: command-line options are parsed before the app runs; prompts are optional interaction inside a command; a TUI owns a navigable terminal screen. These solve different needs, so Spectre.Console-style output does not require a full TUI framework.
