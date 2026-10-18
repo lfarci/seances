@@ -1,8 +1,12 @@
 # Technical plan
 
-Status: implementation direction settled on 2026-10-17: Blazor static SSR, Container Apps Consumption, a scheduled Job sharing its image, and a JSON snapshot in Blob Storage. Prioritize simplicity and low operating cost. Container Apps deployment remains conditional on a credible estimate fitting €5/month. Sizing follows local prototype measurements. Nothing has been deployed.
+Status (2026-10-18): the current product scope is a local-only schedule browser backed by a JSON snapshot produced by the CLI. There is no public hosting or sharing with friends. The Container Apps and Blob Storage design below is a deferred hosting option from the earlier plan, not part of the current MVP. Nothing has been deployed.
 
-## Recommended architecture
+**UGC data-use gate (2026-10-18):** Written approval for the initial architecture's repeated retrieval of UGC schedules, parsing of screenings, and storage in a local JSON snapshot has not been recorded. Belgian CDE Article XI.310's private-use exception for substantial extraction is worded for non-electronic databases, so it does not clearly cover substantial extraction from UGC's online schedule; separate rules address non-substantial extraction. The current project policy is to pause live UGC collection and storage pending written clarification or an authorized feed. Use synthetic fixtures for development and consult UGC's own site for schedules. The technical collection design below remains conditional; the CLI's `--allow-live` flag does not grant permission. See [source discovery and use status](source-discovery.md#use-and-permission-status).
+
+## Deferred hosting and collection proposal
+
+The sections below preserve the earlier cloud deployment and recurring UGC refresh proposal for reference. They are not part of the current local-only MVP; revisit them only after the local workflow is complete and the data-use question is resolved.
 
 One .NET 10 Blazor Web App using static SSR and one container image:
 

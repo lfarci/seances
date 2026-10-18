@@ -2,6 +2,16 @@
 
 Initial read-only investigation, 2026-10-16. Live public fragment retrieval was proven for both Brussels cinemas; implementation findings are recorded below.
 
+## Use and permission status
+
+**Permission status (checked 2026-10-18): no written approval recorded.** The project is local-only for now, with no public hosting or sharing with friends. The initial architecture's UGC workflow is to retrieve the currently published schedules for both Brussels cinemas through their public HTTP pages/fragments, parse all returned screenings, and store a complete local JSON snapshot for the web app. Collection may be repeated when schedules change. UGC's [reservation terms](https://www.ugc.be/conditions-Reservations.html) describe personal, non-commercial use through the site's normal features and restrict copying or reuse for other purposes.
+
+The legal question is whether this repeated collection and local storage are permitted without prior written approval. The FPS Economy [exceptions summary](https://economie.fgov.be/fr/themes/propriete-intellectuelle/droits-de-propriete/droits-dauteur-et-droits/droit-des-bases-de-donnees/protection-des-bases-de/protection-par-le-droit-sui/exceptions-au-droit-exclusif) lists private extraction. Belgian CDE Article XI.310's private-use exception for extracting a substantial part is specifically worded for a **non-electronic** database; UGC schedules are online. Article XI.311 separately addresses a lawful user's extraction or reuse of non-substantial parts, subject to limits including normal exploitation and the producer's legitimate interests. Substantiality, repetition, and the site terms need to be considered for the actual workflow. This is a preliminary risk summary, not a legal opinion.
+
+As a cautious project policy, pause live UGC collection and storage until UGC confirms the specific workflow in writing or an authorized feed is available. The `--allow-live` flag and a robots.txt check are operational safeguards, not permission. Any request should describe the repeated HTTP retrieval, schedule parsing, local JSON storage, and exclusive local use, and ask UGC to confirm in writing through its [contact form](https://www.ugc.be/contact.html).
+
+Until this gate is resolved, use synthetic fixtures for development and UGC's own site for schedule consultation. The live retrieval findings below record technical behavior only; they do not establish authorization to reuse the data.
+
 ## Live findings (supersede earlier access uncertainties below)
 
 Direct HTTPS retrieval outside the network sandbox succeeded without login or browser automation. The cinema page embeds this GET request:
@@ -36,14 +46,13 @@ The inspected examples' finish spans equal film runtime plus 20 minutes. Treat d
 
 `https://www.ugc.be/robots.txt` redirects and was read following the redirect. It lists `/AjaxAction!` as disallowed; the discovered path starts `/showingsCinemaAjaxAction!`, a different literal prefix. It also lists unrelated path restrictions. Recheck source directives before operating the production collector; robots directives are not an API stability commitment.
 
-## Remaining technical work
+## Open source behavior questions
 
-- Implement and validate a parser across ordinary, event, sold-out, empty, and malformed responses.
-- Check date coverage across both cinemas and distinguish explicit empty schedules from failures.
-- Establish past-screening cutoff behavior; do not interpret missing past screenings as cancellations.
-- Verify language-code meanings before deriving spoken language/subtitle fields; retain source labels meanwhile.
-- Observe later refreshes to establish change frequency and cancellation behavior.
-- Check OMDb matching only for genuine gaps; no external metadata was needed for sampled screenings.
+- Confirm coverage and explicit-empty behavior across more cinema/date combinations.
+- Establish the past-screening cutoff; do not interpret missing past screenings as cancellations.
+- Verify language-code meanings before deriving spoken-language or subtitle fields; retain source labels meanwhile.
+- Observe schedule changes over later checks to establish cancellation and update behavior.
+- Check whether any runtime gaps justify metadata enrichment; none were found in the inspected sample.
 
 ## Earlier indexed investigation
 
@@ -73,7 +82,7 @@ The inspected examples' finish spans equal film runtime plus 20 minutes. Treat d
 
 Search-indexed evidence is discovery evidence only; do not use search results as the production showtime feed.
 
-## Implementation status (2026-10-17)
+## Implementation status (2026-10-18)
 
 The integration fixtures are synthetic parser cases with their source URL, service date, and fixture provenance in adjacent JSON files. They cover both cinemas, duplicate IDs, an unavailable room, an upcoming film without a screening button, a sold-out label, an event, and a finish after midnight.
 
