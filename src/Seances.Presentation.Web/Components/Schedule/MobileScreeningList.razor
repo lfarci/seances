@@ -1,0 +1,14 @@
+<ol class="mobile-showings" aria-label="Screenings in time and room order">
+    @foreach (var screening in Screenings)
+    {
+        <li>
+            <ScreeningCard Screening="screening" Mobile="true" />
+        </li>
+    }
+</ol>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<SchedulePageModel.ShowingView> Screenings { get; set; } = [];
+
+}

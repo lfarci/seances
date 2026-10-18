@@ -1,8 +1,10 @@
 using Seances.Data.Storage;
 using Seances.Presentation.Web.Components;
+using Seances.Presentation.Web.Components.Schedule;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents();
+builder.Services.AddSingleton<SchedulePageModelFactory>();
 builder.Services.AddSingleton(_ => new LocalSnapshotStore(
     LocalSnapshotStore.ResolvePath(Environment.GetEnvironmentVariable("SEANCES_SNAPSHOT_PATH"))));
 

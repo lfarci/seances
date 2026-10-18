@@ -1,0 +1,51 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.WebUtilities
+
+<div class="service-date-controls">
+    <nav class="date-navigation" aria-label="Navigate service dates">
+        @if (Model.DateIndex > 0)
+        {
+            <a class="date-step" href="@ScheduleUrl(Model.Dates[Model.DateIndex - 1], Model.Cinema.Id)">Previous date</a>
+        }
+        else
+        {
+            <span class="date-step" aria-disabled="true">Previous date</span>
+        }
+        <p class="date-label">@Model.Date.ToString("dddd, d MMMM", DisplayCulture)</p>
+        @if (Model.DateIndex >= 0 && Model.DateIndex < Model.Dates.Count - 1)
+        {
+            <a class="date-step" href="@ScheduleUrl(Model.Dates[Model.DateIndex + 1], Model.Cinema.Id)">Next date</a>
+        }
+        else
+        {
+            <span class="date-step" aria-disabled="true">Next date</span>
+        }
+    </nav>
+    <form method="get" class="date-picker">
+        <input type="hidden" name="cinema" value="@Model.Cinema.Id" />
+        <label for="service-date">Choose date</label>
+        <select id="service-date" name="date" value="@Model.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">
+            @foreach (var date in Model.Dates)
+            {
+                <option value="@date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" selected="@(date == Model.Date)">
+                    @date.ToString("ddd d MMM", DisplayCulture)
+                </option>
+            }
+        </select>
+        <button type="submit">Show date</button>
+    </form>
+</div>
+
+@code {
+    private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("en-GB");
+
+    [Parameter, EditorRequired]
+    public SchedulePageModel Model { get; set; } = null!;
+
+    private static string ScheduleUrl(DateOnly date, string cinemaId) => QueryHelpers.AddQueryString("/",
+        new Dictionary<string, string?>
+        {
+            ["date"] = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["cinema"] = cinemaId
+        });
+}

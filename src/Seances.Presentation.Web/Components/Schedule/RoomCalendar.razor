@@ -1,0 +1,41 @@
+@using System.Globalization
+
+<div class="calendar-scroll" role="region" tabindex="0"
+     aria-label="Screening calendar for @Model.Cinema.Name on @(Model.Date.ToString("d MMMM yyyy", DisplayCulture)). Scroll horizontally to see more rooms.">
+    <table class="calendar">
+        <caption class="visually-hidden">Showtimes for @Model.Cinema.Name on @Model.Date.ToString("d MMMM yyyy", DisplayCulture)</caption>
+        <thead>
+            <tr>
+                <th scope="col" class="time-heading">Time</th>
+                @foreach (var room in Model.Rooms)
+                {
+                    <th scope="col">@room</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.CalendarRows)
+            {
+                <tr>
+                    <th scope="row" class="time-cell"><time datetime="@row.StartsAt.ToString("O")">@row.StartText</time></th>
+                    @foreach (var cell in row.Cells)
+                    {
+                        <td>
+                            @foreach (var screening in cell.Screenings)
+                            {
+                                <ScreeningCard Screening="screening" />
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("en-GB");
+
+    [Parameter, EditorRequired]
+    public SchedulePageModel Model { get; set; } = null!;
+}

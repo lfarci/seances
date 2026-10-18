@@ -3,4 +3,5 @@
 .vs/
 *.user
 src/Seances.Presentation.Web/data/
+/data.json
 *.suo

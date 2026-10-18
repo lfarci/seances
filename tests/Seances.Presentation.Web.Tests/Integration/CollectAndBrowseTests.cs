@@ -36,7 +36,7 @@ public sealed class CollectAndBrowseTests
     }
 
     [Fact]
-    public async Task Browse_renders_screenings_chronologically_with_details_and_finish_policy()
+    public async Task Browse_scopes_screenings_to_selected_cinema_and_renders_details_and_finish_policy()
     {
         var temporaryDirectory = CreateTemporaryDirectory();
         var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
@@ -50,22 +50,37 @@ public sealed class CollectAndBrowseTests
                     services.AddSingleton(new LocalSnapshotStore(snapshotPath));
                 }));
             using var client = factory.CreateClient();
-            var response = await client.GetAsync("/?date=2026-10-17");
-            var html = await response.Content.ReadAsStringAsync();
-            var pageText = (await new HtmlParser().ParseDocumentAsync(html)).Body!.TextContent;
+            var toisonResponse = await client.GetAsync("/?date=2026-10-17&cinema=1");
+            var toisonHtml = await toisonResponse.Content.ReadAsStringAsync();
+            var toisonPage = await new HtmlParser().ParseDocumentAsync(toisonHtml);
+            var toisonText = toisonPage.Body!.TextContent;
 
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Contains("PRESSURE", pageText);
-            Assert.Contains("EVENING EVENT", pageText);
-            Assert.True(pageText.IndexOf("EVENING EVENT", StringComparison.Ordinal) < pageText.IndexOf("PRESSURE", StringComparison.Ordinal));
-            Assert.Contains("UGC De Brouckère", pageText);
-            Assert.Contains("Room unavailable", pageText);
-            Assert.Contains("source-reported estimate", pageText);
-            Assert.Contains("Sun 18 Oct, 00:35", pageText);
-            Assert.Contains("duration unknown · 3h assumed", pageText);
-            Assert.Contains("Source status: Complet", pageText);
-            Assert.Contains("Book online", pageText);
-            Assert.DoesNotContain("UPCOMING FILM WITHOUT SCREENINGS", pageText);
+            Assert.Equal(HttpStatusCode.OK, toisonResponse.StatusCode);
+            Assert.Contains("EVENING EVENT", toisonText);
+            Assert.Contains("UGC Toison d’Or", toisonText);
+            Assert.Contains("Room unavailable", toisonText);
+            Assert.Contains("source-reported estimate", toisonText);
+            Assert.Contains("Sun 18 Oct, 00:35", toisonText);
+            Assert.Contains("duration unknown · 3h assumed", toisonText);
+            Assert.Contains("Source status: Complet", toisonText);
+            Assert.DoesNotContain("PRESSURE", toisonText);
+            Assert.DoesNotContain("UPCOMING FILM WITHOUT SCREENINGS", toisonText);
+            var nextCinemaLink = toisonPage.QuerySelectorAll(".cinema-picker a")
+                .Single(link => link.TextContent.Trim() == "UGC De Brouckère");
+            Assert.Contains("date=2026-10-17", nextCinemaLink.GetAttribute("href"));
+            Assert.Contains("cinema=2", nextCinemaLink.GetAttribute("href"));
+            Assert.Equal(new[] { "19:30", "23:10" }, toisonPage.QuerySelectorAll(".mobile-showings .mobile-time")
+                .Select(time => time.TextContent.Trim()).ToArray());
+
+            var deBrouckereResponse = await client.GetAsync("/?date=2026-10-17&cinema=2");
+            var deBrouckereHtml = await deBrouckereResponse.Content.ReadAsStringAsync();
+            var deBrouckereText = (await new HtmlParser().ParseDocumentAsync(deBrouckereHtml)).Body!.TextContent;
+
+            Assert.Equal(HttpStatusCode.OK, deBrouckereResponse.StatusCode);
+            Assert.Contains("PRESSURE", deBrouckereText);
+            Assert.Contains("UGC De Brouckère", deBrouckereText);
+            Assert.Contains("Book online", deBrouckereText);
+            Assert.DoesNotContain("EVENING EVENT", deBrouckereText);
         }
         finally
         {
