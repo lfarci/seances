@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Seances.Presentation.Web.Tests.Integration;
 
-public sealed class RefreshAndBrowseTests
+public sealed class CollectAndBrowseTests
 {
     [Fact]
     public async Task Synthetic_source_responses_publish_both_cinemas_and_deduplicate_showings()
@@ -22,7 +22,7 @@ public sealed class RefreshAndBrowseTests
         var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
         try
         {
-            var snapshot = await RefreshFixtureSnapshotAsync(snapshotPath);
+            var snapshot = await CollectAndPublishFixtureSnapshotAsync(snapshotPath);
             Assert.NotNull(snapshot);
             Assert.Equal(new[] { "1", "2" }, snapshot.Cinemas.Select(cinema => cinema.Id).Order().ToArray());
             Assert.Equal(2, snapshot.PublishedDates.Count);
@@ -42,7 +42,7 @@ public sealed class RefreshAndBrowseTests
         var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
         try
         {
-            await RefreshFixtureSnapshotAsync(snapshotPath);
+            await CollectAndPublishFixtureSnapshotAsync(snapshotPath);
             await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
                 builder.ConfigureTestServices(services =>
                 {
@@ -74,22 +74,18 @@ public sealed class RefreshAndBrowseTests
     }
 
     [Fact]
-    public async Task Failed_refresh_preserves_the_last_successful_snapshot()
+    public async Task Collection_returns_data_without_publishing_a_snapshot()
     {
         var temporaryDirectory = CreateTemporaryDirectory();
         var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
-        var emptyFixtures = Path.Combine(temporaryDirectory, "empty-fixtures");
-        Directory.CreateDirectory(emptyFixtures);
         try
         {
-            await RefreshFixtureSnapshotAsync(snapshotPath);
-            var original = await File.ReadAllBytesAsync(snapshotPath);
-            var refreshService = CreateRefreshService(snapshotPath);
+            var collector = CreateCollectionService();
+            var schedule = await collector.CollectAsync(Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"),
+                DateOnly.Parse("2026-10-17"));
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => refreshService.RefreshAsync(emptyFixtures, DateOnly.Parse("2026-10-17")));
-
-            Assert.Equal(original, await File.ReadAllBytesAsync(snapshotPath));
-            Assert.NotNull(await new LocalSnapshotStore(snapshotPath).ReadAsync());
+            Assert.Equal(3, schedule.Screenings.Count);
+            Assert.False(File.Exists(snapshotPath));
         }
         finally
         {
@@ -159,14 +155,16 @@ public sealed class RefreshAndBrowseTests
         return directory;
     }
 
-    private static async Task<Seances.Domain.ScheduleSnapshot?> RefreshFixtureSnapshotAsync(string snapshotPath)
+    private static async Task<Seances.Domain.ScheduleSnapshot?> CollectAndPublishFixtureSnapshotAsync(string snapshotPath)
     {
         var store = new LocalSnapshotStore(snapshotPath);
-        await CreateRefreshService(snapshotPath).RefreshAsync(Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"), DateOnly.Parse("2026-10-17"));
+        var schedule = await CreateCollectionService().CollectAsync(
+            Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"), DateOnly.Parse("2026-10-17"));
+        await store.PublishAsync(schedule);
         return await store.ReadAsync();
     }
 
-    private static ScheduleRefreshService CreateRefreshService(string snapshotPath) =>
-        new(new UgcAdapter(new HttpClient(new NeverRequestHandler()), TimeProvider.System), new LocalSnapshotStore(snapshotPath), TimeProvider.System);
+    private static ScheduleCollectionService CreateCollectionService() =>
+        new(new UgcAdapter(new HttpClient(new NeverRequestHandler()), TimeProvider.System), TimeProvider.System);
 
 }

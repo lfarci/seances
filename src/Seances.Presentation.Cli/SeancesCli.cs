@@ -1,4 +1,4 @@
-using Seances.Presentation.Cli.Commands;
+using Seances.Presentation.Cli.Commands.Collect;
 using Spectre.Console.Cli;
 
 namespace Seances.Presentation.Cli;
@@ -12,12 +12,11 @@ internal static class SeancesCli
         {
             configuration.SetApplicationName("seances");
             configuration.AddCommand<CollectCommand>("collect")
-                .WithDescription("Collect and print UGC schedules without publishing a snapshot.")
-                .WithExample("collect", "--allow-live", "--date", "2026-10-17");
-            configuration.AddCommand<RefreshCommand>("refresh")
-                .WithDescription("Publish a validated schedule snapshot for the web app.")
-                .WithExample("refresh", "--fixture", "tests/Seances.Presentation.Web.Tests/Integration/Fixtures",
-                    "--output", "./schedule.json");
+                .WithDescription("Extract schedule data as a table, JSON, or CSV.")
+                .WithExample("collect", "--fixture", "tests/Seances.Presentation.Web.Tests/Integration/Fixtures",
+                    "--format", "json")
+                .WithExample("collect", "--fixture", "tests/Seances.Presentation.Web.Tests/Integration/Fixtures",
+                    "--output", "./schedule.csv");
         });
 
         return await app.RunAsync(args);

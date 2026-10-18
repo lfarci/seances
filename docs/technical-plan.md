@@ -17,17 +17,17 @@ Scheduled Container Apps Job (same image) ----+
   -> UGC pages/fragments -> parse -> validate -> publish snapshot
 ```
 
-The application supports two entry modes: serve the website, or run a refresh and exit. Shared C# code handles collection, normalization, finish calculations, and data access. There is no separately maintained frontend application or HTTP API required.
+The web host serves its configured JSON snapshot. The CLI runs independently and extracts schedule data to a table, JSON, or CSV on stdout, or writes JSON/CSV to an explicit file path. Shared C# code handles collection and normalization; JSON persistence remains available for the web host, and the CLI does not invoke the web host.
 
 - UI: server-rendered Razor components and CSS. Filters use ordinary GET query parameters, with a little JavaScript for browser preferences and interaction where necessary. Do not enable a global interactive render mode just to use Blazor.
 - Collection: built-in HttpClient plus AngleSharp for the verified HTML fragments.
 - Data: built-in System.Text.Json, one complete versioned JSON snapshot in Blob Storage. No relational database initially.
 - Hosting: Container Apps Consumption, web minimum zero/maximum one replica, single active revision. The user accepts cold starts.
-- Scheduling: Container Apps Job, same image running `Seances.Presentation.Cli refresh`, independent of website traffic. No separate Azure Function needed.
+- Scheduling: Container Apps Job, same image running `Seances.Presentation.Cli collect --allow-live --output /tmp/schedule.json`, independent of website traffic. A successful job can then upload that file to Blob Storage. No separate Azure Function needed.
 - Identity: managed identity for Blob access, with read access for the web app and write access for the job.
 - Deployment: public source, container build and deployment workflow. Use a suitable public registry rather than automatically adding a paid Azure registry.
 
-`Seances.Presentation.Web` hosts the UI and startup. `Seances.Presentation.Cli` provides manual collection inspection and snapshot refresh commands. `Seances.Application` coordinates refresh workflows, `Seances.Data.Collection` owns UGC collection and source mapping, `Seances.Data.Storage` owns local snapshot persistence, and `Seances.Domain` owns internal models and scheduling rules. UGC response DTOs and versioned snapshot-file DTOs are mapped at those boundaries. This split keeps local development self-contained; cloud provisioning remains a separate deployment step.
+`Seances.Presentation.Web` hosts the UI and startup. `Seances.Presentation.Cli` collects schedules into an explicitly named JSON output file. `Seances.Application` coordinates collection and export, `Seances.Data.Collection` owns UGC collection and source mapping, `Seances.Data.Storage` owns JSON persistence and validation, and `Seances.Domain` owns internal models and scheduling rules. UGC response DTOs and versioned snapshot-file DTOs are mapped at those boundaries. This split keeps local development self-contained; cloud provisioning remains a separate deployment step.
 
 ## Blazor rendering behavior
 

@@ -1,40 +1,44 @@
 # CLI reference
 
-The `Seances.Presentation.Cli` app uses Spectre.Console.Cli for command parsing, option validation, and generated help. Run `--help` at the root or after a command to see the supported syntax:
+The `Seances.Presentation.Cli` app uses Spectre.Console.Cli for command parsing, option validation, and generated help. Run `--help` at the root or after a command:
 
 ```sh
 dotnet run --project src/Seances.Presentation.Cli -- --help
-dotnet run --project src/Seances.Presentation.Cli -- refresh --help
+dotnet run --project src/Seances.Presentation.Cli -- collect --help
 ```
 
 ## `collect`
 
-`collect` fetches schedules and prints them without writing a snapshot. Live collection is disabled unless `--allow-live` is passed. That flag is an operational guard, not permission; the current UGC workflow requires written approval. An optional `--date yyyy-MM-dd` limits collection to a service date.
+`collect` extracts schedule data and prints a formatted table by default. Use `--format json` or `--format csv` to write machine-readable output to stdout. Use `--output <path>` to write JSON or CSV to a file; `.json` and `.csv` select the format when `--format` is omitted. Relative output paths resolve from the current directory. File output is atomic, so a failed collection or write preserves an existing destination. Status messages go to stderr.
+
+Use `--fixture <directory>` for offline, repeatable input, or `--allow-live` for authorized UGC collection. The fixture format pairs each `*.html` response with a same-named `*.json` metadata file. Fixture files remain unchanged; committed fixtures are synthetic parser cases and do not contact UGC.
 
 ```sh
-dotnet run --project src/Seances.Presentation.Cli -- collect --allow-live --date 2026-10-19
-```
-
-## `refresh`
-
-`refresh` validates and publishes a complete versioned JSON snapshot. Provide either `--fixture <directory>` for deterministic local input or `--allow-live` for an authorized live refresh. `--date yyyy-MM-dd` is optional.
-
-Fixture files are inputs and remain unchanged. The current fixture format pairs each `*.html` response with a same-named `*.json` metadata file. The committed integration fixtures are synthetic parser cases, so refreshing from them does not contact UGC.
-
-```sh
-dotnet run --project src/Seances.Presentation.Cli -- refresh \
+dotnet run --project src/Seances.Presentation.Cli -- collect \
   --fixture tests/Seances.Presentation.Web.Tests/Integration/Fixtures \
   --date 2026-10-17 \
-  --output ./schedule.json
+  --format json
 ```
 
-Without `--output`, the CLI uses `SEANCES_SNAPSHOT_PATH` when set, or the OS local application-data default. `--output` overrides that setting for this invocation; relative paths resolve from the CLI's current directory. A failed refresh leaves the prior snapshot at the selected output path intact.
-
-The web app uses `SEANCES_SNAPSHOT_PATH` or the OS local application-data default; it does not read the CLI's one-off `--output` option. To browse a snapshot written elsewhere, set the web process's `SEANCES_SNAPSHOT_PATH` to that same absolute path:
+Write JSON or CSV to files:
 
 ```sh
-export SEANCES_SNAPSHOT_PATH="$PWD/schedule.json"
-dotnet run --project src/Seances.Presentation.Web
+dotnet run --project src/Seances.Presentation.Cli -- collect \
+  --fixture tests/Seances.Presentation.Web.Tests/Integration/Fixtures \
+  --output ./schedule.json
+
+dotnet run --project src/Seances.Presentation.Cli -- collect \
+  --fixture tests/Seances.Presentation.Web.Tests/Integration/Fixtures \
+  --output ./schedule.csv
 ```
 
-For live UGC collection, inspect [the project’s current source-use policy](source-discovery.md#use-and-permission-status) first. `--allow-live` does not satisfy that policy.
+Omit `--date` to include all dates available in the source or fixture directory. Live collection requires the explicit `--allow-live` guard:
+
+```sh
+dotnet run --project src/Seances.Presentation.Cli -- collect \
+  --allow-live --date 2026-10-19 --output ./schedule.json
+```
+
+The current UGC source-use policy requires written approval before live collection. `--allow-live` does not grant permission; inspect [the source-use policy](source-discovery.md#use-and-permission-status) first.
+
+JSON output is a self-contained, versioned schedule document. The CLI does not use the web app's snapshot path configuration. Table output is only available on stdout; file output supports JSON and CSV.
