@@ -5,14 +5,33 @@ using Spectre.Console.Cli;
 
 namespace Seances.Presentation.Cli.Commands;
 
-internal sealed class RefreshCommand : AsyncCommand<RefreshSettings>
+public sealed class RefreshCommand : AsyncCommand<RefreshSettings>
 {
+    private readonly IScheduleRefresher _refresher;
+    private readonly TextWriter _output;
+    private readonly TextWriter _error;
+    private readonly Func<string?> _configuredSnapshotPath;
+
+    public RefreshCommand() : this(new UgcScheduleRefresher(), Console.Out, Console.Error,
+        () => Environment.GetEnvironmentVariable("SEANCES_SNAPSHOT_PATH"))
+    {
+    }
+
+    public RefreshCommand(IScheduleRefresher refresher, TextWriter output, TextWriter error,
+        Func<string?> configuredSnapshotPath)
+    {
+        _refresher = refresher;
+        _output = output;
+        _error = error;
+        _configuredSnapshotPath = configuredSnapshotPath;
+    }
+
     public override async Task<int> ExecuteAsync(
         CommandContext context, RefreshSettings settings, CancellationToken cancellationToken)
     {
         if (settings.FixtureDirectory is null && !settings.AllowLive)
         {
-            Console.Error.WriteLine("Live UGC refresh requires --allow-live after checking current source directives.");
+            _error.WriteLine("Live UGC refresh requires --allow-live after checking current source directives.");
             return 2;
         }
 
@@ -20,19 +39,16 @@ internal sealed class RefreshCommand : AsyncCommand<RefreshSettings>
         {
             var configuredPath = settings.OutputPath is { } outputPath
                 ? Path.GetFullPath(outputPath)
-                : Environment.GetEnvironmentVariable("SEANCES_SNAPSHOT_PATH");
+                : _configuredSnapshotPath();
             var snapshotPath = LocalSnapshotStore.ResolvePath(configuredPath);
-            using var client = new HttpClient { Timeout = CliCommandDefaults.HttpTimeout };
-            var adapter = new UgcAdapter(client, TimeProvider.System);
-            var store = new LocalSnapshotStore(snapshotPath);
-            await new ScheduleRefreshService(adapter, store, TimeProvider.System)
-                .RefreshAsync(settings.FixtureDirectory, settings.RequestedDate, cancellationToken);
-            Console.WriteLine($"Published snapshot to {Path.GetFullPath(snapshotPath)}");
+            await _refresher.RefreshAsync(settings.FixtureDirectory, settings.RequestedDate, snapshotPath,
+                cancellationToken);
+            _output.WriteLine($"Published snapshot to {Path.GetFullPath(snapshotPath)}");
             return 0;
         }
         catch (Exception error)
         {
-            Console.Error.WriteLine($"Refresh failed; the last successful snapshot was preserved. {error.Message}");
+            _error.WriteLine($"Refresh failed; the last successful snapshot was preserved. {error.Message}");
             return 1;
         }
     }
