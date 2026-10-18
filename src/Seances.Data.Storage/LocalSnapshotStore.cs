@@ -30,14 +30,8 @@ public sealed class LocalSnapshotStore(string path)
         try
         {
             await using var stream = File.OpenRead(path);
-            var document = await JsonSerializer.DeserializeAsync<SnapshotDocument>(stream, JsonOptions, cancellationToken);
-            if (document is null || document.SchemaVersion != SnapshotDocument.CurrentSchemaVersion) return null;
-
-            var snapshot = SnapshotDocumentMapper.ToDomain(document);
-            SnapshotValidator.Validate(snapshot);
-            return snapshot;
+            return await SnapshotJsonSerializer.DeserializeAsync(stream, cancellationToken);
         }
-        catch (JsonException) { return null; }
         catch (InvalidDataException) { return null; }
         catch (ArgumentException) { return null; }
     }

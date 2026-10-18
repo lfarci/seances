@@ -22,6 +22,8 @@ The fixture responses are synthetic parser cases based on the source structure r
 
 See the [CLI reference](docs/cli.md) for command options, fixture format, and output-path behavior.
 
+Use `dotnet run --project src/Seances.Presentation.Cli -- validate ./schedule.json` to check an existing JSON schedule, or `inspect ./schedule.json` to display its screenings chronologically. Both commands work offline and leave the file unchanged.
+
 This project is local-only for now: it is not published or shared with friends. Permission for the current UGC workflow—retrieving schedules, parsing screenings, and storing them in the local JSON snapshot—is **pending written approval**. Do not run live collection unless UGC has confirmed in writing that this specific collection and local use are permitted. The `--allow-live` flag is only a technical guard; it is not permission. See [source discovery and use status](docs/source-discovery.md#use-and-permission-status).
 
 After written approval, collect one currently published service date from both cinemas with `--date yyyy-MM-dd`; without it, collect all dates currently published:

@@ -5,6 +5,8 @@ The `Seances.Presentation.Cli` app uses Spectre.Console.Cli for command parsing,
 ```sh
 dotnet run --project src/Seances.Presentation.Cli -- --help
 dotnet run --project src/Seances.Presentation.Cli -- collect --help
+dotnet run --project src/Seances.Presentation.Cli -- validate --help
+dotnet run --project src/Seances.Presentation.Cli -- inspect --help
 ```
 
 ## `collect`
@@ -42,3 +44,25 @@ dotnet run --project src/Seances.Presentation.Cli -- collect \
 The current UGC source-use policy requires written approval before live collection. `--allow-live` does not grant permission; inspect [the source-use policy](source-discovery.md#use-and-permission-status) first.
 
 JSON output is a self-contained, versioned schedule document. The CLI does not use the web app's snapshot path configuration. Table output is only available on stdout; file output supports JSON and CSV.
+
+## `validate <path>`
+
+Validate an existing local JSON schedule without collecting data:
+
+```sh
+dotnet run --project src/Seances.Presentation.Cli -- validate ./schedule.json
+```
+
+The command checks the supported schema version, required fields, unique identities, resolved references, and screening coverage counts using the same Storage validation as the web app. A valid schedule, including an explicitly empty one, prints a success message and returns exit status `0`. Malformed, unsupported, inconsistent, or unreadable files produce a diagnostic on stderr and exit status `1`.
+
+## `inspect <path>`
+
+Display the screenings in an existing local JSON schedule:
+
+```sh
+dotnet run --project src/Seances.Presentation.Cli -- inspect ./schedule.json
+```
+
+Inspection validates the file first, then prints a table sorted by screening start across all cinemas. Rows show the service date, cinema-local start time, cinema, film, verbatim source version label, and available format and room. An after-midnight start retains its recorded service date. A valid empty schedule prints an explicit no-screenings message. Success returns `0`; invalid or unreadable input returns `1` with a diagnostic on stderr.
+
+Both commands require an explicit path. Relative input paths resolve from the current directory. They read only that local file, make no source requests, and leave the file unchanged. They do not use `SEANCES_SNAPSHOT_PATH`. Invalid command syntax returns a nonzero exit status.
