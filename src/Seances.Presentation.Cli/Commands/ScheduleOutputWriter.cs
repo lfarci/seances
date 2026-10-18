@@ -4,7 +4,7 @@ using Seances.Data.Storage;
 using Seances.Domain;
 using Spectre.Console;
 
-namespace Seances.Presentation.Cli.Commands.Collect;
+namespace Seances.Presentation.Cli.Commands;
 
 internal static class ScheduleOutputWriter
 {
@@ -79,15 +79,14 @@ internal static class ScheduleOutputWriter
         table.AddColumn("Room");
 
         foreach (var screening in snapshot.Screenings
-                     .OrderBy(screening => screening.ServiceDate)
-                     .ThenBy(screening => cinemas[screening.CinemaId].Name, StringComparer.Ordinal)
-                     .ThenBy(screening => screening.StartsAt))
+                     .OrderBy(screening => screening.StartsAt))
         {
             var cinema = cinemas[screening.CinemaId];
             var localTime = TimeZoneInfo.ConvertTime(screening.StartsAt, TimeZoneInfo.FindSystemTimeZoneById(cinema.TimeZone));
             table.AddRow(screening.ServiceDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                localTime.ToString("HH:mm", CultureInfo.InvariantCulture), cinema.Name,
-                films[screening.FilmId].Title, screening.VersionLabel, screening.Format ?? "", screening.Room ?? "");
+                localTime.ToString("HH:mm", CultureInfo.InvariantCulture), Markup.Escape(cinema.Name),
+                Markup.Escape(films[screening.FilmId].Title), Markup.Escape(screening.VersionLabel),
+                Markup.Escape(screening.Format ?? ""), Markup.Escape(screening.Room ?? ""));
         }
 
         var console = AnsiConsole.Create(new AnsiConsoleSettings

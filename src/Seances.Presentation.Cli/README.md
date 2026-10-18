@@ -1,6 +1,6 @@
 # Séances CLI
 
-The CLI extracts cinema schedule data and can print it as a formatted table, JSON, or CSV. It uses Spectre.Console.Cli for command parsing, option validation, and generated help.
+The CLI extracts cinema schedule data and can print it as a formatted table, JSON, or CSV. It also validates and inspects existing local JSON schedules. It uses Spectre.Console.Cli for command parsing, option validation, and generated help.
 
 Run commands from the repository root with the .NET 10 SDK:
 
@@ -48,7 +48,16 @@ dotnet run --project src/Seances.Presentation.Cli -- collect \
 
 Live collection is currently paused pending written approval for the UGC workflow. `--allow-live` is a technical guard, not permission. Review the [source-use policy](../../docs/source-discovery.md#use-and-permission-status) before any live run.
 
-## Options
+## Validate and inspect a local schedule
+
+```sh
+dotnet run --project src/Seances.Presentation.Cli -- validate ./schedule.json
+dotnet run --project src/Seances.Presentation.Cli -- inspect ./schedule.json
+```
+
+Both commands require an explicit local JSON path, work offline, and leave the file unchanged. Relative paths resolve from the current directory. `validate` checks the document version and schedule consistency. `inspect` applies the same validation and displays screenings chronologically across cinemas, including their service dates, local start times, films, cinemas, and source version labels. Valid empty schedules are accepted. Success returns exit status `0`; invalid or unreadable input returns `1` and an error on stderr.
+
+## Collection options
 
 | Option | Description |
 | --- | --- |

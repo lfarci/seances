@@ -46,8 +46,11 @@ public static class SnapshotValidator
         var keys = publishedDates.Select(date => (date.CinemaId, date.Date)).ToHashSet();
         Require(keys.Count == publishedDates.Count, "Published-date coverage entries must be unique.");
         foreach (var date in publishedDates)
+        {
+            Require(date.Date != default, "Published-date coverage requires a service date.");
             Require(cinemas.Contains(date.CinemaId) && date.FetchedAt != default && date.ScreeningCount >= 0 &&
                     IsHttpsUrl(date.SourceUrl), "Published-date coverage provenance is invalid.");
+        }
         return keys;
     }
 
