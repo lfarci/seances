@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Spectre.Console.Cli" Version="0.57.2" />
     <ProjectReference Include="../Seances.Application/Seances.Application.csproj" />
     <ProjectReference Include="../Seances.Data.Collection/Seances.Data.Collection.csproj" />
     <ProjectReference Include="../Seances.Data.Storage/Seances.Data.Storage.csproj" />

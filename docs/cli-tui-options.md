@@ -4,7 +4,7 @@ Research checked 18 October 2026 against the projects' own documentation, reposi
 
 ## Repository fit
 
-The CLI currently has two non-interactive commands (`collect` and `refresh`), three flags (`--allow-live`, `--date`, `--fixture`), hand-written validation/help, and plain console output. The project targets `net10.0`. `--allow-live` is an explicit safety gate, and `refresh --fixture` supports repeatable local operation. This is a small command-line interface, not a terminal application that needs a persistent screen.
+The CLI has two non-interactive commands (`collect` and `refresh`) and targets `net10.0`. `--allow-live` is an explicit safety gate, and `refresh --fixture` supports repeatable local operation. This is a small command-line interface, not a terminal application that needs a persistent screen. The CLI uses Spectre.Console.Cli 0.57.2 for typed command settings, option parsing, validation, and generated help; command implementations live under `src/Seances.Presentation.Cli/Commands`.
 
 ## Options
 
@@ -19,6 +19,6 @@ The CLI currently has two non-interactive commands (`collect` and `refresh`), th
 
 ## Recommendation
 
-Do not build a full-screen TUI for the current collect/refresh workflow. Keep commands and options scriptable, particularly the live-fetch confirmation gate and fixture mode. The custom parser is small enough to keep if no new CLI features are needed; if replacing hand-written parsing/help is the goal, use stable `System.CommandLine` 2.x. Add `Spectre.Console` separately only if richer tables, progress/status, or an interactive prompt materially improve the operator experience. Reserve `Terminal.Gui` for a future long-running schedule browser or dashboard.
+Do not build a full-screen TUI for the current collect/refresh workflow. Keep commands and options scriptable, particularly the live-fetch confirmation gate, fixture mode, and explicit snapshot output path. Spectre.Console.Cli was selected for its typed command classes and generated help. Add richer Spectre.Console rendering only if tables, progress/status, or an interactive prompt materially improve the operator experience. Reserve `Terminal.Gui` for a future long-running schedule browser or dashboard.
 
 In short: command-line options are parsed before the app runs; prompts are optional interaction inside a command; a TUI owns a navigable terminal screen. These solve different needs, so Spectre.Console-style output does not require a full TUI framework.

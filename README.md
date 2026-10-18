@@ -1,6 +1,6 @@
 # Séances
 
-A .NET 10 Blazor static-SSR application for browsing a local cinema schedule snapshot produced by the CLI. Website requests only read the snapshot. Refresh is a separate command and publishes only after the complete schedule passes validation. The current source adapter targets UGC De Brouckère and UGC Toison d’Or.
+A .NET 10 Blazor static-SSR application for browsing a local cinema schedule snapshot produced by the CLI. Website requests only read the snapshot. Refresh is a separate command and publishes only after the complete schedule passes validation. The versioned snapshot format, validator, and browser are source-neutral; the current collection adapter targets UGC De Brouckère and UGC Toison d’Or.
 
 ## Requirements
 
@@ -16,7 +16,9 @@ dotnet run --project src/Seances.Presentation.Cli -- refresh --fixture tests/Sea
 dotnet run --project src/Seances.Presentation.Web
 ```
 
-The fixture responses are synthetic parser cases based on the source structure recorded in `docs/source-discovery.md`; they are clearly identified in their metadata and are not presented as captured UGC responses. Both entry points use the same snapshot in the OS local application-data directory by default (`~/.local/share/Seances/schedule.json` on Linux). The CLI's `--help` prints the actual path. Set `SEANCES_SNAPSHOT_PATH` to the same absolute path for both processes to override it.
+The fixture responses are synthetic parser cases based on the source structure recorded in `docs/source-discovery.md`; they are clearly identified in their metadata and are not presented as captured UGC responses. Both entry points use the same snapshot in the OS local application-data directory by default (`~/.local/share/Seances/schedule.json` on Linux). The CLI's `--help` shows the available commands and options. Set `SEANCES_SNAPSHOT_PATH` to the same absolute path for both processes to override the default. For a one-off destination, pass `--output <path>` to `refresh`; it overrides the environment setting, and relative paths resolve from the CLI's current directory. To browse that file, set the web app's `SEANCES_SNAPSHOT_PATH` to the same absolute path.
+
+See the [CLI reference](docs/cli.md) for command options, fixture format, and output-path behavior.
 
 This project is local-only for now: it is not published or shared with friends. Permission for the current UGC workflow—retrieving schedules, parsing screenings, and storing them in the local JSON snapshot—is **pending written approval**. Do not run live collection unless UGC has confirmed in writing that this specific collection and local use are permitted. The `--allow-live` flag is only a technical guard; it is not permission. See [source discovery and use status](docs/source-discovery.md#use-and-permission-status).
 

@@ -63,8 +63,8 @@ public sealed class RefreshAndBrowseTests
             Assert.Contains("source-reported estimate", pageText);
             Assert.Contains("Sun 18 Oct, 00:35", pageText);
             Assert.Contains("duration unknown · 3h assumed", pageText);
-            Assert.Contains("UGC status: Complet", pageText);
-            Assert.Contains("Book with UGC", pageText);
+            Assert.Contains("Source status: Complet", pageText);
+            Assert.Contains("Book online", pageText);
             Assert.DoesNotContain("UPCOMING FILM WITHOUT SCREENINGS", pageText);
         }
         finally
