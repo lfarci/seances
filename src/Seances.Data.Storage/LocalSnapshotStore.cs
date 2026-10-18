@@ -18,17 +18,10 @@ public sealed class LocalSnapshotStore(string path)
         return configuredPath;
     }
 
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true
     };
-
-    public IDisposable AcquireRefreshLock()
-    {
-        var fullPath = Path.GetFullPath(path);
-        Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-        return new FileStream(fullPath + ".lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-    }
 
     public async Task<ScheduleSnapshot?> ReadAsync(CancellationToken cancellationToken = default)
     {

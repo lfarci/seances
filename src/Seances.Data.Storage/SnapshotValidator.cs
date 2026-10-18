@@ -5,11 +5,6 @@ namespace Seances.Data.Storage;
 /// <summary>Checks the invariants required before a snapshot can be persisted or served.</summary>
 public static class SnapshotValidator
 {
-    private const string DeBrouckereCinemaId = "2";
-    private const string ToisonDorCinemaId = "1";
-    private const string OfficialUgcHost = "www.ugc.be";
-    private static readonly HashSet<string> RequiredCinemaIds = [DeBrouckereCinemaId, ToisonDorCinemaId];
-
     public static void Validate(ScheduleSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
@@ -24,9 +19,10 @@ public static class SnapshotValidator
 
     private static HashSet<string> ValidateCinemas(IReadOnlyList<Cinema> cinemas)
     {
-        Require(cinemas.Count == RequiredCinemaIds.Count, "The snapshot must cover both Brussels UGC cinemas.");
+        Require(cinemas.Count > 0, "The snapshot must cover at least one cinema.");
+        Require(cinemas.All(cinema => !string.IsNullOrWhiteSpace(cinema.Id)), "Cinema identities are required.");
         var ids = cinemas.Select(cinema => cinema.Id).ToHashSet(StringComparer.Ordinal);
-        Require(ids.SetEquals(RequiredCinemaIds), "The snapshot must cover both Brussels UGC cinemas.");
+        Require(ids.Count == cinemas.Count, "Cinema identities must be unique.");
 
         foreach (var cinema in cinemas)
             Require(!string.IsNullOrWhiteSpace(cinema.Name) && !string.IsNullOrWhiteSpace(cinema.Address) &&
@@ -51,7 +47,7 @@ public static class SnapshotValidator
         Require(keys.Count == publishedDates.Count, "Published-date coverage entries must be unique.");
         foreach (var date in publishedDates)
             Require(cinemas.Contains(date.CinemaId) && date.FetchedAt != default && date.ScreeningCount >= 0 &&
-                    IsOfficialUgcUrl(date.SourceUrl), "Published-date coverage provenance is invalid.");
+                    IsHttpsUrl(date.SourceUrl), "Published-date coverage provenance is invalid.");
         return keys;
     }
 
@@ -66,10 +62,10 @@ public static class SnapshotValidator
             Require(!string.IsNullOrWhiteSpace(screening.Id) && cinemas.Contains(screening.CinemaId) && films.Contains(screening.FilmId) &&
                     dates.Contains((screening.CinemaId, screening.ServiceDate)) && screening.StartsAt != default &&
                     !string.IsNullOrWhiteSpace(screening.VersionLabel) && screening.FetchedAt != default &&
-                    IsOfficialUgcUrl(screening.SourceUrl), "A screening has a missing field or unresolved reference.");
+                    IsHttpsUrl(screening.SourceUrl), "A screening has a missing field or unresolved reference.");
             Require(screening.SourceReportedEndsAt is null || screening.SourceReportedEndsAt > screening.StartsAt,
                 "A source-reported finish must follow the screening start.");
-            Require(screening.BookingUrl is null || IsOfficialUgcUrl(screening.BookingUrl), "Booking links must point to UGC over HTTPS.");
+            Require(screening.BookingUrl is null || IsHttpsUrl(screening.BookingUrl), "Booking links must use HTTPS.");
         }
     }
 
@@ -82,11 +78,11 @@ public static class SnapshotValidator
                 "Published-date screening counts must match the validated snapshot.");
     }
 
-    private static bool IsOfficialUgcUrl(string value) =>
-        Uri.TryCreate(value, UriKind.Absolute, out var uri) && IsOfficialUgcUrl(uri);
+    private static bool IsHttpsUrl(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri) && IsHttpsUrl(uri);
 
-    private static bool IsOfficialUgcUrl(Uri uri) =>
-        uri.Scheme == Uri.UriSchemeHttps && uri.Host.Equals(OfficialUgcHost, StringComparison.OrdinalIgnoreCase);
+    private static bool IsHttpsUrl(Uri uri) =>
+        uri.IsAbsoluteUri && uri.Scheme == Uri.UriSchemeHttps && !string.IsNullOrWhiteSpace(uri.Host);
 
     private static void Require(bool condition, string message)
     {

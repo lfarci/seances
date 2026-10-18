@@ -7,7 +7,7 @@ namespace Seances.Data.Storage.Tests;
 public sealed class SnapshotValidatorTests
 {
     [Fact]
-    public void Accepts_a_complete_two_cinema_snapshot()
+    public void Accepts_a_source_neutral_snapshot_with_non_ugc_ids_and_hosts()
     {
         SnapshotValidator.Validate(ValidSnapshot());
     }
@@ -16,7 +16,7 @@ public sealed class SnapshotValidatorTests
     public void Rejects_a_published_count_that_does_not_match_screenings()
     {
         var snapshot = ValidSnapshot();
-        var dates = snapshot.PublishedDates.Select(date => date.CinemaId == "2" ? date with { ScreeningCount = 2 } : date).ToArray();
+        var dates = snapshot.PublishedDates.Select(date => date.CinemaId == "cinema-east" ? date with { ScreeningCount = 2 } : date).ToArray();
 
         Assert.Throws<InvalidDataException>(() => SnapshotValidator.Validate(snapshot with { PublishedDates = dates }));
     }
@@ -31,10 +31,10 @@ public sealed class SnapshotValidatorTests
     }
 
     [Fact]
-    public void Rejects_a_booking_url_outside_the_official_ugc_host()
+    public void Rejects_a_booking_url_that_does_not_use_https()
     {
         var snapshot = ValidSnapshot();
-        var screenings = snapshot.Screenings.Select(screening => screening with { BookingUrl = new Uri("https://example.com/book") }).ToArray();
+        var screenings = snapshot.Screenings.Select(screening => screening with { BookingUrl = new Uri("http://example.com/book") }).ToArray();
 
         Assert.Throws<InvalidDataException>(() => SnapshotValidator.Validate(snapshot with { Screenings = screenings }));
     }
@@ -52,12 +52,12 @@ public sealed class SnapshotValidatorTests
     {
         var date = new DateOnly(2026, 10, 17);
         var fetchedAt = DateTimeOffset.Parse("2026-10-16T17:14:00Z");
-        const string sourceUrl = "https://www.ugc.be/showings?cinema=2";
-        var screening = new Screening("screening-1", "2", "film-1", date, DateTimeOffset.Parse("2026-10-17T19:30:00Z"),
-            null, null, "VOstBIL", "2D", new Uri("https://www.ugc.be/reservationSeances.html?id=123"), sourceUrl, fetchedAt, null);
-        return new ScheduleSnapshot(fetchedAt, "UGC",
-            [new Cinema("1", "Toison", "Brussels", Cinema.BrusselsTimeZoneId), new Cinema("2", "De Brouckère", "Brussels", Cinema.BrusselsTimeZoneId)],
-            [new PublishedDate("1", date, sourceUrl, fetchedAt, 0), new PublishedDate("2", date, sourceUrl, fetchedAt, 1)],
-            [new Film("film-1", "Film", 100, "UGC")], [screening]);
+        const string sourceUrl = "https://schedules.example.test/showings?cinema=east";
+        var screening = new Screening("screening-1", "cinema-east", "film-1", date, DateTimeOffset.Parse("2026-10-17T19:30:00Z"),
+            null, null, "Original", "2D", new Uri("https://tickets.example.test/book/123"), sourceUrl, fetchedAt, null);
+        return new ScheduleSnapshot(fetchedAt, "fixture",
+            [new Cinema("cinema-west", "West Cinema", "Brussels", Cinema.BrusselsTimeZoneId), new Cinema("cinema-east", "East Cinema", "Brussels", Cinema.BrusselsTimeZoneId)],
+            [new PublishedDate("cinema-west", date, sourceUrl, fetchedAt, 0), new PublishedDate("cinema-east", date, sourceUrl, fetchedAt, 1)],
+            [new Film("film-1", "Film", 100, "fixture")], [screening]);
     }
 }

@@ -8,9 +8,9 @@
 
 <main>
     <header>
-        <p class="eyebrow">BRUSSELS · UGC</p>
+        <p class="eyebrow">CINEMA SCHEDULES</p>
         <h1>Find your next film.</h1>
-        <p class="intro">Upcoming screenings at De Brouckère and Toison d’Or.</p>
+        <p class="intro">Upcoming screenings at the cinemas in this schedule.</p>
     </header>
 
     @if (_snapshot is null)
@@ -68,7 +68,7 @@
                             <p class="start"><time datetime="@screening.StartsAt.ToString("O")">@Brussels(screening.StartsAt)</time></p>
                             <h3>@film.Title</h3>
                             <p class="meta">@cinema.Name · @screening.VersionLabel@if (!string.IsNullOrWhiteSpace(screening.Format)) { <span> · @screening.Format</span> }</p>
-                            @if (screening.SourceStatus is not null) { <p class="meta">UGC status: @screening.SourceStatus</p> }
+                            @if (screening.SourceStatus is not null) { <p class="meta">Source status: @screening.SourceStatus</p> }
                             <details>
                                 <summary>Screening details</summary>
                                 <dl>
@@ -82,7 +82,7 @@
                                 </dl>
                                 @if (screening.BookingUrl is not null)
                                 {
-                                    <a href="@screening.BookingUrl" rel="external">Book with UGC</a>
+                                    <a href="@screening.BookingUrl" rel="external">Book online</a>
                                 }
                                 else
                                 {
