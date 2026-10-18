@@ -5,8 +5,6 @@ namespace Seances.Presentation.Cli.Commands;
 
 internal sealed class CollectCommand : AsyncCommand<CollectSettings>
 {
-    private static readonly TimeSpan HttpTimeout = TimeSpan.FromSeconds(20);
-
     public override async Task<int> ExecuteAsync(
         CommandContext context, CollectSettings settings, CancellationToken cancellationToken)
     {
@@ -18,7 +16,7 @@ internal sealed class CollectCommand : AsyncCommand<CollectSettings>
 
         try
         {
-            using var client = new HttpClient { Timeout = HttpTimeout };
+            using var client = new HttpClient { Timeout = CliCommandDefaults.HttpTimeout };
             var collected = await new UgcAdapter(client, TimeProvider.System)
                 .CollectAsync(cancellationToken, settings.RequestedDate);
             PrintCollection(collected);

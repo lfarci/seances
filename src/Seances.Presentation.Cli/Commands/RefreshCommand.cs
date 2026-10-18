@@ -7,8 +7,6 @@ namespace Seances.Presentation.Cli.Commands;
 
 internal sealed class RefreshCommand : AsyncCommand<RefreshSettings>
 {
-    private static readonly TimeSpan HttpTimeout = TimeSpan.FromSeconds(20);
-
     public override async Task<int> ExecuteAsync(
         CommandContext context, RefreshSettings settings, CancellationToken cancellationToken)
     {
@@ -24,7 +22,7 @@ internal sealed class RefreshCommand : AsyncCommand<RefreshSettings>
                 ? Path.GetFullPath(outputPath)
                 : Environment.GetEnvironmentVariable("SEANCES_SNAPSHOT_PATH");
             var snapshotPath = LocalSnapshotStore.ResolvePath(configuredPath);
-            using var client = new HttpClient { Timeout = HttpTimeout };
+            using var client = new HttpClient { Timeout = CliCommandDefaults.HttpTimeout };
             var adapter = new UgcAdapter(client, TimeProvider.System);
             var store = new LocalSnapshotStore(snapshotPath);
             await new ScheduleRefreshService(adapter, store, TimeProvider.System)
