@@ -1,0 +1,18 @@
+@if (!Model.HasCoverage)
+{
+    <p class="empty-state" role="status">The programme is not published for this cinema and date.</p>
+}
+else if (Model.Screenings.Count == 0)
+{
+    <p class="empty-state" role="status">No screenings were listed in the successful check.</p>
+}
+else
+{
+    <RoomCalendar Model="Model" />
+    <MobileScreeningList Screenings="Model.Screenings" />
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SchedulePageModel Model { get; set; } = null!;
+}

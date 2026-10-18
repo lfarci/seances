@@ -1,0 +1,24 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.WebUtilities
+
+<nav class="cinema-picker" aria-label="Choose a cinema">
+    @foreach (var cinema in Model.Cinemas)
+    {
+        <a href="@ScheduleUrl(Model.Date, cinema.Id)"
+           aria-current="@(cinema.Id == Model.Cinema.Id ? "page" : null)">
+            @cinema.Name
+        </a>
+    }
+</nav>
+
+@code {
+    [Parameter, EditorRequired]
+    public SchedulePageModel Model { get; set; } = null!;
+
+    private static string ScheduleUrl(DateOnly date, string cinemaId) => QueryHelpers.AddQueryString("/",
+        new Dictionary<string, string?>
+        {
+            ["date"] = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["cinema"] = cinemaId
+        });
+}

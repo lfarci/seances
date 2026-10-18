@@ -1,14 +1,10 @@
 @page "/"
-@using Seances.Domain
-@using Seances.Data.Storage
-@using System.Globalization
-@using Microsoft.AspNetCore.WebUtilities
 @inject LocalSnapshotStore SnapshotStore
-@inject IConfiguration Configuration
+@inject SchedulePageModelFactory PageModelFactory
 @inject NavigationManager Navigation
 
 <main>
-    @if (_snapshot is null)
+    @if (_model is null)
     {
         <header>
             <h1>Find a screening</h1>
@@ -21,261 +17,40 @@
     }
     else
     {
-        var cinemas = _snapshot.Cinemas;
-        var cinema = SelectedCinema(_snapshot);
-        var dates = _snapshot.PublishedDates.Select(item => item.Date).Distinct().Order().ToArray();
-        var date = SelectedDate(dates);
-        var dateIndex = Array.IndexOf(dates, date);
-        var coverage = _snapshot.PublishedDates.FirstOrDefault(item => item.CinemaId == cinema.Id && item.Date == date);
-        var screenings = _snapshot.Screenings
-            .Where(item => item.CinemaId == cinema.Id && item.ServiceDate == date)
-            .OrderBy(item => item.StartsAt)
-            .ThenBy(item => RoomNumber(RoomName(item.Room)))
-            .ThenBy(item => RoomName(item.Room), StringComparer.Ordinal)
-            .ToArray();
-        var rooms = screenings.Select(item => RoomName(item.Room)).Distinct(StringComparer.Ordinal)
-            .OrderBy(RoomNumber).ThenBy(item => item, StringComparer.Ordinal).ToArray();
-        var showtimes = screenings.Select(item => item.StartsAt).Distinct().Order().ToArray();
-
         <header class="page-heading">
             <h1>Find a screening</h1>
             <p class="intro">Browse showtimes by cinema, room, and time.</p>
         </header>
 
-        <nav class="cinema-picker" aria-label="Choose a cinema">
-            @foreach (var choice in cinemas)
-            {
-                <a href="@ScheduleUrl(date, choice.Id)"
-                   aria-current="@(choice.Id == cinema.Id ? "page" : null)">
-                    @choice.Name
-                </a>
-            }
-        </nav>
+        <CinemaPicker Model="_model" />
 
         <section class="schedule" aria-labelledby="schedule-heading">
             <div class="schedule-toolbar">
                 <div>
-                    <h2 id="schedule-heading">@cinema.Name</h2>
-                    <p class="address">@cinema.Address</p>
+                    <h2 id="schedule-heading">@_model.Cinema.Name</h2>
+                    <p class="address">@_model.Cinema.Address</p>
                 </div>
-                <div class="service-date-controls">
-                    <nav class="date-navigation" aria-label="Navigate service dates">
-                        @if (dateIndex > 0)
-                        {
-                            <a class="date-step" href="@ScheduleUrl(dates[dateIndex - 1], cinema.Id)">Previous date</a>
-                        }
-                        else
-                        {
-                            <span class="date-step" aria-disabled="true">Previous date</span>
-                        }
-                        <p class="date-label">@date.ToString("dddd, d MMMM", CultureInfo.GetCultureInfo("en-GB"))</p>
-                        @if (dateIndex < dates.Length - 1)
-                        {
-                            <a class="date-step" href="@ScheduleUrl(dates[dateIndex + 1], cinema.Id)">Next date</a>
-                        }
-                        else
-                        {
-                            <span class="date-step" aria-disabled="true">Next date</span>
-                        }
-                    </nav>
-                    <form method="get" class="date-picker">
-                        <input type="hidden" name="cinema" value="@cinema.Id" />
-                        <label for="service-date">Choose date</label>
-                        <select id="service-date" name="date" value="@date.ToString("yyyy-MM-dd")">
-                            @foreach (var choice in dates)
-                            {
-                                <option value="@choice.ToString("yyyy-MM-dd")" selected="@(choice == date)">
-                                    @choice.ToString("ddd d MMM", CultureInfo.GetCultureInfo("en-GB"))
-                                </option>
-                            }
-                        </select>
-                        <button type="submit">Show date</button>
-                    </form>
-                </div>
+                <ScheduleDateControls Model="_model" />
             </div>
 
-            <p class="freshness">Schedule checked @BrusselsDateTime(_snapshot.CheckedAt) Brussels time</p>
-            @if (DateTimeOffset.UtcNow - _snapshot.CheckedAt > TimeSpan.FromHours(36))
+            <p class="freshness">Schedule checked @_model.CheckedAtText Brussels time</p>
+            @if (_model.IsStale)
             {
                 <p class="notice stale-notice" role="status">This schedule may be out of date.</p>
             }
 
-            @if (coverage is null)
-            {
-                <p class="empty-state" role="status">The programme is not published for this cinema and date.</p>
-            }
-            else if (screenings.Length == 0)
-            {
-                <p class="empty-state" role="status">No screenings were listed in the successful check.</p>
-            }
-            else
-            {
-                <div class="calendar-scroll" role="region" tabindex="0"
-                     aria-label="Screening calendar for @cinema.Name on @(date.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("en-GB"))). Scroll horizontally to see more rooms.">
-                    <table class="calendar">
-                        <caption class="visually-hidden">Showtimes for @cinema.Name on @date.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("en-GB"))</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col" class="time-heading">Time</th>
-                                @foreach (var room in rooms)
-                                {
-                                    <th scope="col">@room</th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var showtime in showtimes)
-                            {
-                                <tr>
-                                    <th scope="row" class="time-cell"><time datetime="@showtime.ToString("O")">@Brussels(showtime)</time></th>
-                                    @foreach (var room in rooms)
-                                    {
-                                        var inRoom = screenings.Where(item => item.StartsAt == showtime && RoomName(item.Room) == room).ToArray();
-                                        <td>
-                                            @foreach (var screening in inRoom)
-                                            {
-                                                var film = _snapshot.Films.First(item => item.Id == screening.FilmId);
-                                                var allowance = AllowanceFor(cinema.Id);
-                                                var finish = SchedulePolicy.Finish(screening, film, allowance);
-                                                <article class="showing">
-                                                    <p class="showing-time"><time datetime="@screening.StartsAt.ToString("O")">@Brussels(screening.StartsAt)</time></p>
-                                                    <h3>@film.Title</h3>
-                                                    <p class="showing-room">@room</p>
-                                                    <p class="showing-meta">@screening.VersionLabel@if (!string.IsNullOrWhiteSpace(screening.Format)) { <span> · @screening.Format</span> }</p>
-                                                    <details>
-                                                        <summary>More details</summary>
-                                                        <dl>
-                                                            <dt>Version</dt><dd>@screening.VersionLabel</dd>
-                                                            <dt>Format</dt><dd>@(screening.Format ?? "Unavailable")</dd>
-                                                            <dt>Room</dt><dd>@room</dd>
-                                                            <dt>Runtime</dt><dd>@(film.RuntimeMinutes is { } runtime ? $"{runtime} minutes" : "Runtime unavailable") · @film.RuntimeProvenance</dd>
-                                                            <dt>Estimated finish</dt><dd>@BrusselsFinish(finish.At, screening.ServiceDate) · @FinishLabel(finish.Basis, allowance)@if (finish.Label is not null) { <span> · @finish.Label</span> }</dd>
-                                                            @if (screening.SourceStatus is not null) { <dt>Source status</dt><dd>@screening.SourceStatus</dd> }
-                                                        </dl>
-                                                        @if (screening.BookingUrl is not null)
-                                                        {
-                                                            <a href="@screening.BookingUrl" rel="external">Book online</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <p>Booking link unavailable.</p>
-                                                        }
-                                                    </details>
-                                                </article>
-                                            }
-                                        </td>
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <ol class="mobile-showings" aria-label="Screenings in time and room order">
-                    @foreach (var screening in screenings)
-                    {
-                        var film = _snapshot.Films.First(item => item.Id == screening.FilmId);
-                        var allowance = AllowanceFor(cinema.Id);
-                        var finish = SchedulePolicy.Finish(screening, film, allowance);
-                        var room = RoomName(screening.Room);
-                        <li>
-                            <article class="mobile-showing">
-                                <p class="mobile-time"><time datetime="@screening.StartsAt.ToString("O")">@Brussels(screening.StartsAt)</time></p>
-                                <p class="mobile-room">@room</p>
-                                <h3>@film.Title</h3>
-                                <p class="showing-meta">@screening.VersionLabel@if (!string.IsNullOrWhiteSpace(screening.Format)) { <span> · @screening.Format</span> }</p>
-                                <details>
-                                    <summary>More details</summary>
-                                    <dl>
-                                        <dt>Version</dt><dd>@screening.VersionLabel</dd>
-                                        <dt>Format</dt><dd>@(screening.Format ?? "Unavailable")</dd>
-                                        <dt>Room</dt><dd>@room</dd>
-                                        <dt>Runtime</dt><dd>@(film.RuntimeMinutes is { } runtime ? $"{runtime} minutes" : "Runtime unavailable") · @film.RuntimeProvenance</dd>
-                                        <dt>Estimated finish</dt><dd>@BrusselsFinish(finish.At, screening.ServiceDate) · @FinishLabel(finish.Basis, allowance)@if (finish.Label is not null) { <span> · @finish.Label</span> }</dd>
-                                        @if (screening.SourceStatus is not null) { <dt>Source status</dt><dd>@screening.SourceStatus</dd> }
-                                    </dl>
-                                    @if (screening.BookingUrl is not null)
-                                    {
-                                        <a href="@screening.BookingUrl" rel="external">Book online</a>
-                                    }
-                                    else
-                                    {
-                                        <p>Booking link unavailable.</p>
-                                    }
-                                </details>
-                            </article>
-                        </li>
-                    }
-                </ol>
-            }
+            <ScreeningCalendar Model="_model" />
         </section>
     }
 </main>
 
 @code {
-    private ScheduleSnapshot? _snapshot;
-    protected override async Task OnInitializedAsync() => _snapshot = await SnapshotStore.ReadAsync();
+    private SchedulePageModel? _model;
 
-    private Cinema SelectedCinema(ScheduleSnapshot snapshot)
+    protected override async Task OnInitializedAsync()
     {
-        var query = QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
-        return query.TryGetValue("cinema", out var value)
-            ? snapshot.Cinemas.FirstOrDefault(item => item.Id == value.ToString()) ?? snapshot.Cinemas[0]
-            : snapshot.Cinemas[0];
+        var snapshot = await SnapshotStore.ReadAsync();
+        if (snapshot is not null)
+            _model = PageModelFactory.Create(snapshot, new Uri(Navigation.Uri), DateTimeOffset.UtcNow);
     }
-
-    private DateOnly SelectedDate(DateOnly[] dates)
-    {
-        if (dates.Length == 0)
-            return BrusselsToday();
-
-        var query = QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
-        if (query.TryGetValue("date", out var value) && DateOnly.TryParse(value.ToString(), out var parsed) && dates.Contains(parsed))
-            return parsed;
-
-        var today = BrusselsToday();
-        return dates.FirstOrDefault(date => date >= today, dates[^1]);
-    }
-
-    private static DateOnly BrusselsToday() => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow,
-        TimeZoneInfo.FindSystemTimeZoneById(Cinema.BrusselsTimeZoneId)).DateTime);
-
-    private static string ScheduleUrl(DateOnly date, string cinemaId) => QueryHelpers.AddQueryString("/", new Dictionary<string, string?>
-    {
-        ["date"] = date.ToString("yyyy-MM-dd"),
-        ["cinema"] = cinemaId
-    });
-
-    private static string RoomName(string? room) => string.IsNullOrWhiteSpace(room) ? "Room unavailable" : room.Trim();
-    private static int RoomNumber(string room)
-    {
-        var number = new string(room.SkipWhile(character => !char.IsDigit(character))
-            .TakeWhile(char.IsDigit).ToArray());
-        return int.TryParse(number, out var result) ? result : room == "Room unavailable" ? int.MaxValue : int.MaxValue - 1;
-    }
-
-    private static string Brussels(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant,
-        TimeZoneInfo.FindSystemTimeZoneById(Cinema.BrusselsTimeZoneId)).ToString("HH:mm", CultureInfo.GetCultureInfo("en-GB"));
-    private static string BrusselsDateTime(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant,
-        TimeZoneInfo.FindSystemTimeZoneById(Cinema.BrusselsTimeZoneId)).ToString("ddd d MMM, HH:mm", CultureInfo.GetCultureInfo("en-GB"));
-    private static string BrusselsFinish(DateTimeOffset instant, DateOnly serviceDate)
-    {
-        var local = TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.FindSystemTimeZoneById(Cinema.BrusselsTimeZoneId));
-        return DateOnly.FromDateTime(local.DateTime) == serviceDate
-            ? local.ToString("HH:mm", CultureInfo.GetCultureInfo("en-GB"))
-            : local.ToString("ddd d MMM, HH:mm", CultureInfo.GetCultureInfo("en-GB"));
-    }
-
-    private int AllowanceFor(string cinemaId)
-    {
-        var configured = Configuration[$"Schedule:Allowances:{cinemaId}"];
-        return int.TryParse(configured, out var minutes) && minutes >= 0 ? minutes : 20;
-    }
-
-    private static string FinishLabel(FinishBasis basis, int allowance) => basis switch
-    {
-        FinishBasis.SourceReportedEstimate => "source-reported estimate · not a guaranteed exit time",
-        FinishBasis.RuntimeEstimate => $"runtime estimate + {allowance}-minute allowance",
-        _ => $"assumed runtime + {allowance}-minute allowance"
-    };
 }
