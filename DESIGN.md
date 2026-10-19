@@ -51,12 +51,12 @@ components:
 
 Séances is a task-focused schedule reader for Brussels cinema-goers. Its visual system keeps the incumbent cream, burgundy, and Georgia identity while using a restrained neutral palette to keep cinema, date, room, and start time easy to scan.
 
-The schedule is grouped by cinema and service date. At wide sizes, showings sit in a semantic room-by-time table; at narrower sizes, the same ordered information becomes a chronological list. Controls retain visible labels and keyboard focus styling. The code provides no specified WCAG conformance level, and this document makes no conformance claim.
+The schedule is grouped by cinema and service date. At wide sizes, showings sit in a semantic room-by-time table beside a screening detail pane; at narrower sizes, the same ordered information becomes a chronological list with details below it. Controls retain visible labels and keyboard focus styling. The code provides no specified WCAG conformance level, and this document makes no conformance claim.
 
 **Key Characteristics:**
 - Cream page canvas, warm paper surfaces, and burgundy schedule accents.
 - Georgia headings paired with a system sans-serif interface font.
-- Room-by-time table on wider screens and chronological screening list on narrow screens.
+- Room-by-time table with a selected-screening detail pane on wider screens and chronological screening list on narrow screens.
 - Visible keyboard focus treatment and labeled navigation and date controls.
 
 ## Colors
@@ -91,7 +91,7 @@ The palette pairs warm cream and paper neutrals with a deep burgundy accent; blu
 
 ## Layout
 
-The page uses a centered content column with a wide maximum on desktop and a narrower maximum below 52rem. A schedule panel groups the cinema address, date controls, freshness information, and schedule. On wide screens, the schedule is a room-by-time table inside a bounded scroll region; room headers and the time column remain sticky while scrolling. Below 52rem, the table is replaced by a chronological list, and date controls stack vertically. Below 26rem, the content gutters and list time column tighten. The cinema chooser can scroll horizontally when its links do not fit.
+The page uses nearly the full viewport width with consistent gutters on desktop and laptop, then a narrower centered column below 52rem. A schedule panel groups the cinema address, date controls, freshness information, and schedule. On wide screens, the schedule pairs a room-by-time table with a selected-screening detail pane; the table fills its available width inside a bounded scroll region, and room headers and the time column remain sticky while scrolling. Below 52rem, the table is replaced by a chronological list and the detail pane moves below it; date controls stack vertically. Below 26rem, the content gutters and list time column tighten. The cinema chooser can scroll horizontally when its links do not fit.
 
 ## Elevation & Depth
 
@@ -118,11 +118,12 @@ Controls use gently rounded corners, notices and showing cards use a slightly la
 
 ### Cards / Containers
 - The schedule panel uses a paper surface, warm divider border, and broad corner rounding.
-- Screening cards use a pale burgundy tint, a fine warm border, and compact internal padding. Additional details are disclosed with the native details/summary control.
+- Screening cards use a paper surface, a fine warm border, compact internal padding, and Georgia film titles. Selected cards use a pale burgundy tint; selecting a card updates the screening detail pane.
 
 ### Schedule
 - The desktop table uses semantic column and row headers for rooms and times. Its time column and room headers stay visible within the scroll region.
-- The narrow layout presents showings in chronological order, with time and room kept alongside each film title.
+- Selecting a showing opens its version, format, runtime, estimated finish, and booking information in the adjacent detail pane.
+- The narrow layout presents selectable showings in chronological order, with time and room kept alongside each film title; selected details appear below the list.
 
 ## Do's and Don'ts
 

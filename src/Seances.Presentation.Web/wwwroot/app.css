@@ -25,7 +25,7 @@ body {
 }
 
 main {
-    width: min(100% - 2.5rem, 88rem);
+    width: calc(100% - 2.5rem);
     margin: 0 auto;
     padding: 3.25rem 0 5rem;
 }
@@ -232,9 +232,19 @@ button:hover {
     scrollbar-color: #9b8d7d #eee8df;
 }
 
+.calendar-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 23rem);
+    align-items: start;
+    gap: 1rem;
+}
+
+.calendar-content {
+    min-width: 0;
+}
+
 .calendar {
-    width: max-content;
-    min-width: 100%;
+    width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
@@ -242,7 +252,7 @@ button:hover {
 
 .calendar th,
 .calendar td {
-    width: 13.25rem;
+    min-width: 13.25rem;
     padding: .55rem;
     border-right: 1px solid #e5ded4;
     border-bottom: 1px solid #e5ded4;
@@ -296,18 +306,45 @@ button:hover {
 }
 
 .showing {
-    min-height: 8rem;
-    padding: .85rem;
-    border: 1px solid #d9c7be;
-    border-radius: .55rem;
-    background: var(--accent-soft);
+    display: flex;
+    width: 100%;
+    min-height: 7.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .35rem;
+    padding: .75rem;
+    border: 1px solid var(--line);
+    border-radius: .45rem;
+    background: #fffefa;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .16s ease, background-color .16s ease;
 }
 
 .showing + .showing {
     margin-top: .5rem;
 }
 
-.showing-time,
+.showing:hover {
+    border-color: #b99a8c;
+    background: #fbf5f0;
+}
+
+.showing[aria-pressed="true"],
+.mobile-showing[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.showing-title {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.28;
+    overflow-wrap: anywhere;
+}
+
 .mobile-time {
     margin-bottom: .35rem;
     color: var(--accent-dark);
@@ -316,60 +353,139 @@ button:hover {
     font-weight: 750;
 }
 
-.showing h3,
-.mobile-showing h3 {
-    margin-bottom: .3rem;
-    font-size: 1rem;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-}
-
 .showing-room,
 .mobile-room {
-    margin-bottom: .25rem;
     color: #423a32;
     font-size: .9rem;
     font-weight: 650;
 }
 
 .showing-meta {
-    margin: 0 0 .55rem;
     color: var(--muted);
-    font-size: .85rem;
+    font-size: .8rem;
     line-height: 1.45;
 }
 
-details {
-    margin-top: .55rem;
+.screening-details {
+    position: sticky;
+    top: 1rem;
+    min-height: 15rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: .65rem;
+    background: #fbf8f3;
 }
 
-summary {
-    width: fit-content;
-    min-height: 2rem;
-    padding: .3rem 0;
+.details-heading {
+    position: relative;
+    padding: 0 2rem 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.details-heading h3 {
+    margin: 0 0 .45rem;
+    font: 500 1.55rem/1.2 Georgia, serif;
+    overflow-wrap: anywhere;
+}
+
+.details-kicker {
+    margin: 0 0 .65rem;
     color: var(--accent-dark);
-    cursor: pointer;
-    font-weight: 650;
-    text-decoration: underline;
-    text-underline-offset: .2em;
+    font-size: .82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
-dl {
+.details-version {
+    margin: 0;
+    color: var(--muted);
+    font-size: .92rem;
+}
+
+.details-close {
+    position: absolute;
+    top: -.35rem;
+    right: -.35rem;
     display: grid;
-    grid-template-columns: minmax(6rem, auto) 1fr;
-    gap: .45rem .75rem;
-    margin: .65rem 0;
+    width: 2.5rem;
+    min-height: 2.5rem;
+    place-items: center;
+    padding: .55rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+}
+
+.details-close:hover {
+    border-color: #b99a8c;
+    background: var(--accent-soft);
+    color: var(--ink);
+}
+
+.details-close svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.7;
+}
+
+.details-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .2rem;
+    margin: 1rem 0 1.25rem;
     font-size: .9rem;
     line-height: 1.45;
 }
 
-dt {
+.details-list dt {
+    margin-top: .6rem;
+    color: var(--muted);
+    font-size: .76rem;
     font-weight: 700;
 }
 
-dd {
+.details-list dd {
     margin: 0;
     overflow-wrap: anywhere;
+}
+
+.details-note {
+    display: block;
+    margin-top: .2rem;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.details-empty-title {
+    margin: 0 0 .5rem;
+    font: 500 1.3rem/1.25 Georgia, serif;
+}
+
+.details-empty-copy,
+.booking-unavailable {
+    margin: 0;
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.booking-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    padding: .55rem .8rem;
+    border-radius: .35rem;
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.booking-link:hover {
+    background: var(--accent-dark);
 }
 
 .mobile-showings {
@@ -427,8 +543,17 @@ dd {
         width: 100%;
     }
 
+    .calendar-workspace {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .calendar-scroll {
         display: none;
+    }
+
+    .screening-details {
+        position: static;
+        min-height: 0;
     }
 
     .mobile-showings {
@@ -444,9 +569,22 @@ dd {
 
     .mobile-showing {
         display: grid;
+        width: 100%;
         grid-template-columns: 5.25rem 1fr;
         column-gap: .9rem;
-        padding: 1rem .2rem;
+        row-gap: .2rem;
+        padding: .9rem .35rem;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        border-radius: 0;
+        background: transparent;
+        color: var(--ink);
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .mobile-showing:hover {
+        background: #fbf5f0;
     }
 
     .mobile-time,
@@ -455,22 +593,17 @@ dd {
         margin: 0;
     }
 
-    .mobile-showing h3,
-    .mobile-showing > .showing-meta,
-    .mobile-showing details {
+    .mobile-showing .showing-title,
+    .mobile-showing > .showing-meta {
         grid-column: 2;
     }
 
-    .mobile-showing h3 {
+    .mobile-showing .showing-title {
         grid-row: 1 / span 2;
     }
 
     .mobile-showing > .showing-meta {
-        margin-top: .25rem;
-    }
-
-    .mobile-showing details {
-        margin-top: .4rem;
+        grid-row: 3;
     }
 }
 

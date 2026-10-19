@@ -39,14 +39,19 @@
                 <p class="notice stale-notice" role="status">This schedule may be out of date.</p>
             }
 
-            <ScreeningCalendar Model="_model" />
+            <ScreeningCalendar Model="_model" SelectedScreening="_selectedScreening" OnScreeningSelected="SelectScreening" OnScreeningClosed="CloseScreening" />
         </section>
     }
 </main>
 
 @code {
     private SchedulePageModel? _model;
+    private SchedulePageModel.ShowingView? _selectedScreening;
 
+    private void SelectScreening(SchedulePageModel.ShowingView screening) =>
+        _selectedScreening = _selectedScreening?.Screening.Id == screening.Screening.Id ? null : screening;
+
+    private void CloseScreening() => _selectedScreening = null;
     protected override async Task OnInitializedAsync()
     {
         var snapshot = await SnapshotStore.ReadAsync();

@@ -23,7 +23,7 @@
                         <td>
                             @foreach (var screening in cell.Screenings)
                             {
-                                <ScreeningCard Screening="screening" />
+                                <ScreeningCard Screening="screening" Selected="@(screening.Screening.Id == SelectedScreening?.Screening.Id)" OnSelected="OnScreeningSelected" />
                             }
                         </td>
                     }
@@ -38,4 +38,11 @@
 
     [Parameter, EditorRequired]
     public SchedulePageModel Model { get; set; } = null!;
+
+    [Parameter]
+    public SchedulePageModel.ShowingView? SelectedScreening { get; set; }
+
+    [Parameter]
+    public EventCallback<SchedulePageModel.ShowingView> OnScreeningSelected { get; set; }
+
 }

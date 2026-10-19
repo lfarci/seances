@@ -1,0 +1,46 @@
+@if (Screening is null)
+{
+    <aside class="screening-details" aria-label="Screening details" aria-live="polite">
+        <p class="details-empty-title">Choose a screening</p>
+        <p class="details-empty-copy">Select a film in the calendar to see its version, runtime, and booking information here.</p>
+    </aside>
+}
+else
+{
+    <aside class="screening-details" aria-label="Screening details" aria-live="polite">
+        <div class="details-heading">
+            <p class="details-kicker">@Screening.StartText · @Screening.Room</p>
+            <button class="details-close" type="button" aria-label="Close screening details" @onclick="OnScreeningClosed">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" /></svg>
+            </button>
+            <h3>@Screening.Film.Title</h3>
+            <p class="details-version">@Screening.Screening.VersionLabel</p>
+        </div>
+        <dl class="details-list">
+            <dt>Format</dt><dd>@(Screening.Screening.Format ?? "Unavailable")</dd>
+            <dt>Runtime</dt><dd>@Screening.RuntimeText</dd>
+            <dt>Estimated finish</dt>
+            <dd>@Screening.FinishText <span class="details-note">@Screening.FinishDescription@if (Screening.Finish.Label is not null) { <span> · @Screening.Finish.Label</span> }</span></dd>
+            @if (Screening.Screening.SourceStatus is not null)
+            {
+                <dt>Source status</dt><dd>@Screening.Screening.SourceStatus</dd>
+            }
+        </dl>
+        @if (Screening.Screening.BookingUrl is not null)
+        {
+            <a class="booking-link" href="@Screening.Screening.BookingUrl" rel="external">Book online</a>
+        }
+        else
+        {
+            <p class="booking-unavailable">Booking link unavailable.</p>
+        }
+    </aside>
+}
+
+@code {
+    [Parameter]
+    public SchedulePageModel.ShowingView? Screening { get; set; }
+
+    [Parameter]
+    public EventCallback OnScreeningClosed { get; set; }
+}

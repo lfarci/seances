@@ -2,7 +2,7 @@
     @foreach (var screening in Screenings)
     {
         <li>
-            <ScreeningCard Screening="screening" Mobile="true" />
+            <ScreeningCard Screening="screening" Mobile="true" Selected="@(screening.Screening.Id == SelectedScreening?.Screening.Id)" OnSelected="OnScreeningSelected" />
         </li>
     }
 </ol>
@@ -10,5 +10,11 @@
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyList<SchedulePageModel.ShowingView> Screenings { get; set; } = [];
+
+    [Parameter]
+    public SchedulePageModel.ShowingView? SelectedScreening { get; set; }
+
+    [Parameter]
+    public EventCallback<SchedulePageModel.ShowingView> OnScreeningSelected { get; set; }
 
 }
