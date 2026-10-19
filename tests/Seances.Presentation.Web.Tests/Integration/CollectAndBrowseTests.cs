@@ -36,7 +36,7 @@ public sealed class CollectAndBrowseTests
     }
 
     [Fact]
-    public async Task Browse_scopes_screenings_to_selected_cinema_and_renders_details_and_finish_policy()
+    public async Task Browse_scopes_screenings_to_selected_cinema_and_renders_selectable_showings()
     {
         var temporaryDirectory = CreateTemporaryDirectory();
         var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
@@ -59,10 +59,15 @@ public sealed class CollectAndBrowseTests
             Assert.Contains("EVENING EVENT", toisonText);
             Assert.Contains("UGC Toison d’Or", toisonText);
             Assert.Contains("Room unavailable", toisonText);
-            Assert.Contains("source-reported estimate", toisonText);
-            Assert.Contains("Sun 18 Oct, 00:35", toisonText);
-            Assert.Contains("duration unknown · 3h assumed", toisonText);
-            Assert.Contains("Source status: Complet", toisonText);
+            Assert.Contains("Choose a screening", toisonText);
+            Assert.Single(toisonPage.QuerySelectorAll(".screening-details"));
+            Assert.Empty(toisonPage.QuerySelectorAll(".details-list"));
+            Assert.All(toisonPage.QuerySelectorAll(".showing, .mobile-showing"), card =>
+            {
+                Assert.Equal("BUTTON", card.TagName);
+                Assert.Equal("button", card.GetAttribute("type"));
+                Assert.Equal("false", card.GetAttribute("aria-pressed"));
+            });
             Assert.DoesNotContain("PRESSURE", toisonText);
             Assert.DoesNotContain("UPCOMING FILM WITHOUT SCREENINGS", toisonText);
             var nextCinemaLink = toisonPage.QuerySelectorAll(".cinema-picker a")
@@ -79,7 +84,7 @@ public sealed class CollectAndBrowseTests
             Assert.Equal(HttpStatusCode.OK, deBrouckereResponse.StatusCode);
             Assert.Contains("PRESSURE", deBrouckereText);
             Assert.Contains("UGC De Brouckère", deBrouckereText);
-            Assert.Contains("Book online", deBrouckereText);
+            Assert.Contains("Choose a screening", deBrouckereText);
             Assert.DoesNotContain("EVENING EVENT", deBrouckereText);
         }
         finally

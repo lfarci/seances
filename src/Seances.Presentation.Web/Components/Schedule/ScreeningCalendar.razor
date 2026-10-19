@@ -8,11 +8,26 @@ else if (Model.Screenings.Count == 0)
 }
 else
 {
-    <RoomCalendar Model="Model" />
-    <MobileScreeningList Screenings="Model.Screenings" />
+    <div class="calendar-workspace">
+        <div class="calendar-content">
+            <RoomCalendar Model="Model" SelectedScreening="SelectedScreening" OnScreeningSelected="OnScreeningSelected" />
+            <MobileScreeningList Screenings="Model.Screenings" SelectedScreening="SelectedScreening" OnScreeningSelected="OnScreeningSelected" />
+        </div>
+        <ScreeningDetailsPane Screening="SelectedScreening" OnScreeningClosed="OnScreeningClosed" />
+    </div>
 }
 
 @code {
     [Parameter, EditorRequired]
     public SchedulePageModel Model { get; set; } = null!;
+
+    [Parameter]
+    public SchedulePageModel.ShowingView? SelectedScreening { get; set; }
+
+    [Parameter]
+    public EventCallback<SchedulePageModel.ShowingView> OnScreeningSelected { get; set; }
+
+    [Parameter]
+    public EventCallback OnScreeningClosed { get; set; }
+
 }

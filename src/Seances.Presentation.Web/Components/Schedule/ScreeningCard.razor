@@ -1,33 +1,23 @@
-<article class="@(Mobile ? "mobile-showing" : "showing")">
-    <p class="@(Mobile ? "mobile-time" : "showing-time")">
-        <time datetime="@Screening.Screening.StartsAt.ToString("O")">@Screening.StartText</time>
-    </p>
-    <h3>@Screening.Film.Title</h3>
-    <p class="@(Mobile ? "mobile-room" : "showing-room")">@Screening.Room</p>
-    <p class="showing-meta">@Screening.Screening.VersionLabel@if (!string.IsNullOrWhiteSpace(Screening.Screening.Format)) { <span> · @Screening.Screening.Format</span> }</p>
-    <details>
-        <summary>More details</summary>
-        <dl>
-            <dt>Version</dt><dd>@Screening.Screening.VersionLabel</dd>
-            <dt>Format</dt><dd>@(Screening.Screening.Format ?? "Unavailable")</dd>
-            <dt>Room</dt><dd>@Screening.Room</dd>
-            <dt>Runtime</dt><dd>@Screening.RuntimeText</dd>
-            <dt>Estimated finish</dt><dd>@Screening.FinishText · @Screening.FinishDescription@if (Screening.Finish.Label is not null) { <span> · @Screening.Finish.Label</span> }</dd>
-            @if (Screening.Screening.SourceStatus is not null)
-            {
-                <dt>Source status:</dt><dd>@($" {Screening.Screening.SourceStatus}")</dd>
-            }
-        </dl>
-        @if (Screening.Screening.BookingUrl is not null)
+<button type="button" class="@(Mobile ? "mobile-showing" : "showing")" aria-pressed="@(Selected ? "true" : "false")"
+        aria-label="@Screening.StartText, @Screening.Film.Title, @(Screening.Room). Show screening details"
+        @onclick="SelectScreening">
+    @if (Mobile)
+    {
+        <time class="mobile-time" datetime="@Screening.Screening.StartsAt.ToString("O")">@Screening.StartText</time>
+    }
+    <span class="showing-title">@Screening.Film.Title</span>
+    @if (Mobile)
+    {
+        <span class="mobile-room">@Screening.Room</span>
+    }
+    <span class="showing-meta">
+        @Screening.Screening.VersionLabel
+        @if (!string.IsNullOrWhiteSpace(Screening.Screening.Format))
         {
-            <a href="@Screening.Screening.BookingUrl" rel="external">Book online</a>
+            <span> · @Screening.Screening.Format</span>
         }
-        else
-        {
-            <p>Booking link unavailable.</p>
-        }
-    </details>
-</article>
+    </span>
+</button>
 
 @code {
     [Parameter, EditorRequired]
@@ -35,4 +25,13 @@
 
     [Parameter]
     public bool Mobile { get; set; }
+
+    [Parameter]
+    public bool Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<SchedulePageModel.ShowingView> OnSelected { get; set; }
+
+    private Task SelectScreening() => OnSelected.InvokeAsync(Screening);
+
 }
