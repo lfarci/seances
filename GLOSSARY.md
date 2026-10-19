@@ -16,6 +16,10 @@ _Avoid_: Cinema when referring to an auditorium
 The movie being shown, independent of any particular screening.
 _Avoid_: Screening when referring to the movie itself
 
+**Original title**:
+The title under which a film was originally released, in its original language. It may differ from a localized title used by a cinema.
+_Avoid_: English title when the film's original title is not English
+
 **Screening**:
 One scheduled showing of a film at a particular cinema and start time, with its own language and format details. Its room may be unknown.
 _Avoid_: Film when referring to a scheduled showing

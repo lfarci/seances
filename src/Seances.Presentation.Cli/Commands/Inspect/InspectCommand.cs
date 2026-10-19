@@ -17,7 +17,7 @@ public sealed class InspectCommand : AsyncCommand<ScheduleFileSettings>
                 Console.Out.WriteLine("No screenings in this valid schedule.");
                 return 0;
             }
-            await ScheduleOutputWriter.WriteAsync(schedule, "table", null, Console.Out, Console.Error,
+            await ScheduleOutputWriter.WriteAsync(schedule, "table", null, Console.Out,
                 cancellationToken);
             return 0;
         }

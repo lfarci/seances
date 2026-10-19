@@ -11,6 +11,82 @@ public sealed class SeancesCliTests : IDisposable
     private readonly string _directory = Directory.CreateTempSubdirectory("seances-cli-").FullName;
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Collects_original_title_from_offline_film_pages_and_keeps_logs_off_stdout(bool verbose)
+    {
+        var fixtureDirectory = Path.Combine(_directory, "fixtures");
+        Directory.CreateDirectory(Path.Combine(fixtureDirectory, "films"));
+        await File.WriteAllTextAsync(Path.Combine(fixtureDirectory, "schedule.html"), """
+            <div id='bloc-showing-film-42'>
+              <h3><a href='/film.html?id=42'>LE VOYAGE</a></h3>
+              <button data-showing='1' data-film='42' data-title='LE VOYAGE' data-cinema='2'
+                data-date='2026-10-17' data-time='22:00' data-version='VO'>
+                <span class='screening-time-end'>00:06</span>
+              </button>
+            </div>
+            """);
+        await File.WriteAllTextAsync(Path.Combine(fixtureDirectory, "schedule.json"), """
+            {"cinemaId":"2","cinemaName":"Cinema","address":"Brussels","serviceDate":"2026-10-17",
+             "sourceUrl":"https://www.ugc.be/showings","fetchedAt":"2026-10-16T18:00:00Z"}
+            """);
+        await File.WriteAllTextAsync(Path.Combine(fixtureDirectory, "films", "42.html"), """
+            <dl><dt>Titre original</dt><dd>The Journey</dd></dl><p>Durée : 1h46</p>
+            """);
+        var arguments = new List<string> { "collect", "--fixture", fixtureDirectory, "--format", "json" };
+        if (verbose) arguments.Add("--verbose");
+
+        var (exitCode, output, error) = await RunAsync(arguments.ToArray());
+
+        Assert.Equal(0, exitCode);
+        var document = JsonNode.Parse(output)!;
+        var film = Assert.Single(document["films"]!.AsArray())!;
+        Assert.Equal("The Journey", film["title"]!.GetValue<string>());
+        Assert.Equal("LE VOYAGE", film["sourceTitle"]!.GetValue<string>());
+        Assert.Null(film["runtimeMinutes"]);
+        Assert.Equal("https://www.ugc.be/film.html?id=42", film["detailUrl"]!.GetValue<string>());
+        Assert.Contains("ScheduleCollectionService: Reading fixture", error);
+        Assert.Contains("Collection complete:", error);
+        Assert.Contains("0 incomplete films", error);
+        Assert.DoesNotContain("WARNING", error);
+        Assert.Equal(verbose, error.Contains("Reading film fixture", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Collect_selects_multiple_service_dates_when_date_option_is_repeated()
+    {
+        var fixtureDirectory = Path.Combine(_directory, "multi-date-fixtures");
+        Directory.CreateDirectory(fixtureDirectory);
+        foreach (var date in new[] { "2026-10-17", "2026-10-18" })
+        {
+            await File.WriteAllTextAsync(Path.Combine(fixtureDirectory, $"{date}.html"),
+                "<div class='no-showings'>Aucune séance</div>");
+            await File.WriteAllTextAsync(Path.Combine(fixtureDirectory, $"{date}.json"), $$"""
+                {"cinemaId":"2","cinemaName":"Cinema","address":"Brussels","serviceDate":"{{date}}",
+                 "sourceUrl":"https://www.ugc.be/showings","fetchedAt":"2026-10-16T18:00:00Z"}
+                """);
+        }
+
+        var (exitCode, output, error) = await RunAsync(
+            "collect", "--fixture", fixtureDirectory, "--format", "json",
+            "--date", "2026-10-17", "--date", "2026-10-18");
+
+        Assert.Equal(0, exitCode);
+        Assert.DoesNotContain(error.Split('\n'), line => line.Contains("Collection failed", StringComparison.Ordinal));
+        var dates = JsonNode.Parse(output)!["publishedDates"]!.AsArray()
+            .Select(date => date!["date"]!.GetValue<string>()).Distinct().Order().ToArray();
+        Assert.Equal(new[] { "2026-10-17", "2026-10-18" }, dates);
+
+        var (rangeExitCode, rangeOutput, _) = await RunAsync(
+            "collect", "--fixture", fixtureDirectory, "--format", "json",
+            "--from", "2026-10-17", "--to", "2026-10-18");
+        var rangeDates = JsonNode.Parse(rangeOutput)!["publishedDates"]!.AsArray()
+            .Select(date => date!["date"]!.GetValue<string>()).Distinct().Order().ToArray();
+        Assert.Equal(0, rangeExitCode);
+        Assert.Equal(new[] { "2026-10-17", "2026-10-18" }, rangeDates);
+    }
+
+    [Theory]
     [InlineData("validate")]
     [InlineData("inspect")]
     public async Task Commands_reject_missing_service_dates_even_when_references_match(string command)

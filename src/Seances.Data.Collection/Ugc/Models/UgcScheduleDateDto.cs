@@ -1,4 +1,4 @@
-namespace Seances.Data.Collection;
+namespace Seances.Data.Collection.Ugc.Models;
 
 /// <summary>One UGC response for a cinema and published service date.</summary>
 public sealed record UgcScheduleDateDto(

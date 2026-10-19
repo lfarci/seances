@@ -10,7 +10,8 @@ internal static class SnapshotDocumentMapper
         snapshot.Source,
         snapshot.Cinemas.Select(cinema => new CinemaDocument(cinema.Id, cinema.Name, cinema.Address, cinema.TimeZone)).ToArray(),
         snapshot.PublishedDates.Select(date => new PublishedDateDocument(date.CinemaId, date.Date, date.SourceUrl, date.FetchedAt, date.ScreeningCount)).ToArray(),
-        snapshot.Films.Select(film => new FilmDocument(film.Id, film.Title, film.RuntimeMinutes, film.RuntimeProvenance)).ToArray(),
+        snapshot.Films.Select(film => new FilmDocument(film.Id, film.Title, film.RuntimeMinutes, film.RuntimeProvenance,
+            film.OriginalTitle, film.SourceTitle, film.DetailUrl)).ToArray(),
         snapshot.Screenings.Select(ToDocument).ToArray());
 
     public static ScheduleSnapshot ToDomain(SnapshotDocument document)
@@ -23,7 +24,8 @@ internal static class SnapshotDocumentMapper
         return new ScheduleSnapshot(document.CheckedAt, document.Source,
             document.Cinemas.Select(cinema => new Cinema(cinema.Id, cinema.Name, cinema.Address, cinema.TimeZone)).ToArray(),
             document.PublishedDates.Select(date => new PublishedDate(date.CinemaId, date.Date, date.SourceUrl, date.FetchedAt, date.ScreeningCount)).ToArray(),
-            document.Films.Select(film => new Film(film.Id, film.Title, film.RuntimeMinutes, film.RuntimeProvenance)).ToArray(),
+            document.Films.Select(film => new Film(film.Id, film.Title, film.RuntimeMinutes, film.RuntimeProvenance,
+                film.OriginalTitle, film.SourceTitle, film.DetailUrl)).ToArray(),
             document.Screenings.Select(ToDomain).ToArray());
     }
 

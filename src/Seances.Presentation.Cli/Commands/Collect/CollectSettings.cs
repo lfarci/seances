@@ -8,6 +8,10 @@ namespace Seances.Presentation.Cli.Commands.Collect;
 
 public sealed class CollectSettings : ScheduleCommandSettings
 {
+    [CommandOption("--verbose")]
+    [Description("Include request, retry, and film detail diagnostics on stderr.")]
+    public bool Verbose { get; init; }
+
     [CommandOption("--allow-live")]
     [Description("Allow live collection after checking current source directives.")]
     public bool AllowLive { get; init; }

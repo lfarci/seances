@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Seances.Application;
-using Seances.Data.Collection;
+using Seances.Data.Collection.Ugc;
 using Seances.Data.Storage;
 using Seances.Domain;
 using Xunit;
@@ -102,7 +102,7 @@ public sealed class CollectAndBrowseTests
         {
             var collector = CreateCollectionService();
             var schedule = await collector.CollectAsync(Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"),
-                DateOnly.Parse("2026-10-17"));
+                ScheduleDateSelection.ForDates([DateOnly.Parse("2026-10-17")]));
 
             Assert.Equal(3, schedule.Screenings.Count);
             Assert.False(File.Exists(snapshotPath));
@@ -179,7 +179,8 @@ public sealed class CollectAndBrowseTests
     {
         var store = new LocalSnapshotStore(snapshotPath);
         var schedule = await CreateCollectionService().CollectAsync(
-            Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"), DateOnly.Parse("2026-10-17"));
+            Path.Combine(AppContext.BaseDirectory, "Integration", "Fixtures"),
+            ScheduleDateSelection.ForDates([DateOnly.Parse("2026-10-17")]));
         await store.PublishAsync(schedule);
         return await store.ReadAsync();
     }
