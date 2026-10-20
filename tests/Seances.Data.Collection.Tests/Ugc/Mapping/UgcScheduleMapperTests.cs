@@ -1,20 +1,45 @@
-using Seances.Data.Collection;
+using Seances.Data.Collection.Ugc.Models;
+using Seances.Data.Collection.Ugc.Mapping;
 using Seances.Domain;
 using Xunit;
 
-namespace Seances.Data.Collection.Tests;
+namespace Seances.Data.Collection.Tests.Ugc.Mapping;
 
 public sealed class UgcScheduleMapperTests
 {
+    [Fact]
+    public void Combines_original_title_and_detail_link_across_dates_and_cinemas()
+    {
+        var first = new UgcFilmDto("42", "LE VOYAGE");
+        var richer = first with { OriginalTitle = "The Journey",
+            DetailUrl = new Uri("https://www.ugc.be/film.html?id=42") };
+        var date = new DateOnly(2026, 10, 17);
+        var at = DateTimeOffset.UtcNow;
+        var collected = new[]
+        {
+            new UgcScheduleDateDto("2", "Cinema", "Brussels", date, "https://www.ugc.be/showings", at, [first], []),
+            new UgcScheduleDateDto("1", "Other cinema", "Brussels", date, "https://www.ugc.be/showings", at, [richer, first], [])
+        };
+
+        var film = Assert.Single(UgcScheduleMapper.ToSnapshot(collected, at, "UGC").Films);
+
+        Assert.Equal("The Journey", film.Title);
+        Assert.Equal("The Journey", film.OriginalTitle);
+        Assert.Equal("LE VOYAGE", film.SourceTitle);
+        Assert.Equal(richer.DetailUrl, film.DetailUrl);
+        Assert.Null(film.RuntimeMinutes);
+        Assert.Equal("not collected", film.RuntimeProvenance);
+    }
+
     [Fact]
     public void Maps_UGC_date_and_screening_DTOs_to_domain_records_and_deduplicates_ids()
     {
         var date = new DateOnly(2026, 10, 17);
         var fetchedAt = DateTimeOffset.Parse("2026-10-16T17:14:00Z");
         const string sourceUrl = "https://www.ugc.be/showings?cinema=2";
-        var film = new UgcFilmDto("film-1", "Film", 100, "UGC film block");
+        var film = new UgcFilmDto("film-1", "Film");
         var screening = new UgcScreeningDto("screening-1", "2", "film-1", date,
-            DateTimeOffset.Parse("2026-10-17T19:30:00Z"), null, "Salle 4", "VOstBIL", "2D",
+            DateTimeOffset.Parse("2026-10-17T19:30:00Z"), null, "Salle 4", "VOstBIL",
             new Uri("https://www.ugc.be/reservationSeances.html?id=123"), sourceUrl, fetchedAt, "Complet");
         var collected = new[]
         {

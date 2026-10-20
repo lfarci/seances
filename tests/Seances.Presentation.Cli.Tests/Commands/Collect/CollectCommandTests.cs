@@ -6,6 +6,99 @@ namespace Seances.Presentation.Cli.Tests.Commands.Collect;
 
 public sealed class CollectCommandTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Verbose_adds_exception_diagnostics_to_stderr(bool verbose)
+    {
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+        var command = new CollectCommand(new FakeScheduleCollector(CreateSchedule(), new InvalidOperationException("unavailable")), output, error);
+
+        var result = await command.ExecuteAsync(null!, new CollectSettings
+        {
+            FixtureDirectory = "fixtures", Format = "json", Verbose = verbose
+        }, CancellationToken.None);
+
+        Assert.Equal(1, result);
+        Assert.Empty(output.ToString());
+        Assert.Contains("Collection failed. unavailable", error.ToString());
+        Assert.Equal(verbose, error.ToString().Contains("Collection failure details", StringComparison.Ordinal));
+        Assert.Equal(verbose, error.ToString().Contains("System.InvalidOperationException", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Warns_once_per_incomplete_film_even_with_multiple_screenings()
+    {
+        var schedule = CreateSchedule();
+        schedule = schedule with
+        {
+            Screenings = [schedule.Screenings[0], schedule.Screenings[0] with { Id = "screening-2" }],
+            PublishedDates = schedule.PublishedDates.Select(date => date with { ScreeningCount = 2 }).ToArray()
+        };
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+        var command = new CollectCommand(new FakeScheduleCollector(schedule), output, error);
+
+        var result = await command.ExecuteAsync(null!, new CollectSettings
+        {
+            FixtureDirectory = "fixtures", Format = "json"
+        }, CancellationToken.None);
+
+        Assert.Equal(0, result);
+        Assert.Single(error.ToString().Split('\n'), line => line.Contains(": Film ", StringComparison.Ordinal));
+        Assert.Contains("film-1): missing original title, film detail URL", error.ToString());
+        Assert.Contains("1 incomplete films", error.ToString());
+    }
+
+    [Theory]
+    [InlineData("table")]
+    [InlineData("csv")]
+    public async Task Includes_known_runtime_and_source_finish_in_human_and_csv_output(string format)
+    {
+        var schedule = CreateSchedule();
+        schedule = schedule with
+        {
+            Screenings = schedule.Screenings.Select(screening => screening with
+            { SourceReportedEndsAt = screening.StartsAt.AddMinutes(110) }).ToArray()
+        };
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+        var command = new CollectCommand(new FakeScheduleCollector(schedule), output, error);
+
+        var result = await command.ExecuteAsync(null!, new CollectSettings
+        {
+            FixtureDirectory = "fixtures", Format = format
+        }, CancellationToken.None);
+
+        Assert.Equal(0, result);
+        Assert.Contains("Runtime", output.ToString());
+        Assert.Contains("90", output.ToString());
+        Assert.Contains(format == "table" ? "22:20" : "2026-10-17T20:20:00", output.ToString());
+    }
+
+    [Fact]
+    public async Task Required_schedule_failure_preserves_existing_output_file()
+    {
+        var directory = CreateTemporaryDirectory();
+        var path = Path.Combine(directory, "schedule.json");
+        try
+        {
+            await File.WriteAllTextAsync(path, "previous snapshot");
+            using var output = new StringWriter();
+            using var error = new StringWriter();
+            var command = new CollectCommand(new FakeScheduleCollector(CreateSchedule(), new HttpRequestException("source unavailable")), output, error);
+
+            var result = await command.ExecuteAsync(null!, new CollectSettings
+            { FixtureDirectory = "fixtures", OutputPath = path }, CancellationToken.None);
+
+            Assert.Equal(1, result);
+            Assert.Empty(output.ToString());
+            Assert.Equal("previous snapshot", await File.ReadAllTextAsync(path));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
     [Fact]
     public async Task Live_collection_requires_the_explicit_flag()
     {
@@ -37,7 +130,7 @@ public sealed class CollectCommandTests
         Assert.Contains("Cinema", output.ToString());
         Assert.Contains("Film, One", output.ToString());
         Assert.Contains("20:30", output.ToString());
-        Assert.Empty(error.ToString());
+        Assert.Contains("Collection complete:", error.ToString());
     }
 
     [Fact]
@@ -57,7 +150,7 @@ public sealed class CollectCommandTests
         Assert.Equal(0, result);
         Assert.Contains("\"schemaVersion\": 1", output.ToString());
         Assert.Contains("\"title\": \"Film, One\"", output.ToString());
-        Assert.Empty(error.ToString());
+        Assert.Contains("Collection complete:", error.ToString());
     }
 
     [Fact]
@@ -77,7 +170,7 @@ public sealed class CollectCommandTests
         Assert.Equal(0, result);
         Assert.Contains("CinemaId,Cinema,ServiceDate,ScreeningId,FilmId,Film,StartsAt", output.ToString());
         Assert.Contains("\"Film, One\"", output.ToString());
-        Assert.Empty(error.ToString());
+        Assert.Contains("Collection complete:", error.ToString());
     }
 
     [Fact]
@@ -199,7 +292,7 @@ public sealed class CollectCommandTests
     {
         public bool WasCalled { get; private set; }
 
-        public Task<ScheduleSnapshot> CollectAsync(string? fixtureDirectory, DateOnly? requestedDate,
+        public Task<ScheduleSnapshot> CollectAsync(string? fixtureDirectory, ScheduleDateSelection? dateSelection,
             CancellationToken cancellationToken)
         {
             WasCalled = true;

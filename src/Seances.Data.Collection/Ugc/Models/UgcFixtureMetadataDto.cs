@@ -1,4 +1,4 @@
-namespace Seances.Data.Collection;
+namespace Seances.Data.Collection.Ugc.Models;
 
 /// <summary>Sidecar JSON fields used to replay one captured UGC response.</summary>
 public sealed record UgcFixtureMetadataDto(

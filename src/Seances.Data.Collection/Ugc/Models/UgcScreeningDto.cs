@@ -1,4 +1,4 @@
-namespace Seances.Data.Collection;
+namespace Seances.Data.Collection.Ugc.Models;
 
 /// <summary>Screening fields extracted from a UGC HTML response.</summary>
 public sealed record UgcScreeningDto(
@@ -10,7 +10,6 @@ public sealed record UgcScreeningDto(
     DateTimeOffset? SourceReportedEndsAt,
     string? Room,
     string VersionLabel,
-    string? Format,
     Uri? BookingUrl,
     string SourceUrl,
     DateTimeOffset FetchedAt,

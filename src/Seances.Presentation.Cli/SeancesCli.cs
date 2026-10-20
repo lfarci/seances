@@ -1,4 +1,5 @@
 using Seances.Presentation.Cli.Commands.Collect;
+using Seances.Presentation.Cli.Commands.Dates;
 using Seances.Presentation.Cli.Commands.Inspect;
 using Seances.Presentation.Cli.Commands.Validate;
 using Spectre.Console.Cli;
@@ -25,6 +26,9 @@ internal static class SeancesCli
                     "--format", "json")
                 .WithExample("collect", "--fixture", "tests/Seances.Presentation.Web.Tests/Integration/Fixtures",
                     "--output", "./schedule.csv");
+            configuration.AddCommand<DatesCommand>("dates")
+                .WithDescription("List published service dates for UGC cinemas.")
+                .WithExample("dates", "--allow-live");
         });
 
         return await app.RunAsync(args);

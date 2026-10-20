@@ -11,11 +11,12 @@ internal static class ScheduleOutputWriter
     private static readonly string[] CsvHeaders =
     [
         "CinemaId", "Cinema", "ServiceDate", "ScreeningId", "FilmId", "Film", "StartsAt", "Version",
-        "Format", "Room", "SourceReportedEndsAt", "BookingUrl", "SourceUrl"
+        "Format", "Room", "SourceReportedEndsAt", "BookingUrl", "SourceUrl",
+        "RuntimeMinutes", "OriginalTitle", "SourceTitle", "FilmDetailUrl"
     ];
 
     public static async Task WriteAsync(ScheduleSnapshot snapshot, string format, string? outputPath,
-        TextWriter output, TextWriter error, CancellationToken cancellationToken)
+        TextWriter output, CancellationToken cancellationToken)
     {
         var content = format switch
         {
@@ -33,7 +34,6 @@ internal static class ScheduleOutputWriter
         }
 
         await WriteAtomicallyAsync(outputPath, content!, cancellationToken);
-        error.WriteLine($"Wrote {format} to {Path.GetFullPath(outputPath)}");
     }
 
     private static string ToCsv(ScheduleSnapshot snapshot)
@@ -54,7 +54,9 @@ internal static class ScheduleOutputWriter
                 screening.Id, film.Id, film.Title, screening.StartsAt.ToString("O", CultureInfo.InvariantCulture),
                 screening.VersionLabel, screening.Format ?? "", screening.Room ?? "",
                 screening.SourceReportedEndsAt?.ToString("O", CultureInfo.InvariantCulture) ?? "",
-                screening.BookingUrl?.ToString() ?? "", screening.SourceUrl
+                screening.BookingUrl?.ToString() ?? "", screening.SourceUrl,
+                film.RuntimeMinutes?.ToString(CultureInfo.InvariantCulture) ?? "", film.OriginalTitle ?? "",
+                film.SourceTitle ?? "", film.DetailUrl?.ToString() ?? ""
             ];
             rows.Add(string.Join(',', values.Select(EscapeCsv)));
         }
@@ -71,7 +73,9 @@ internal static class ScheduleOutputWriter
         var films = snapshot.Films.ToDictionary(film => film.Id);
         var table = new Table().Border(TableBorder.Rounded);
         table.AddColumn("Date");
-        table.AddColumn("Time");
+        table.AddColumn("Start");
+        table.AddColumn("Finish (UGC)");
+        table.AddColumn("Runtime (min)");
         table.AddColumn("Cinema");
         table.AddColumn("Film");
         table.AddColumn("Version");
@@ -84,7 +88,9 @@ internal static class ScheduleOutputWriter
             var cinema = cinemas[screening.CinemaId];
             var localTime = TimeZoneInfo.ConvertTime(screening.StartsAt, TimeZoneInfo.FindSystemTimeZoneById(cinema.TimeZone));
             table.AddRow(screening.ServiceDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                localTime.ToString("HH:mm", CultureInfo.InvariantCulture), Markup.Escape(cinema.Name),
+                localTime.ToString("HH:mm", CultureInfo.InvariantCulture), FormatFinish(screening, cinema),
+                films[screening.FilmId].RuntimeMinutes?.ToString(CultureInfo.InvariantCulture) ?? "?",
+                Markup.Escape(cinema.Name),
                 Markup.Escape(films[screening.FilmId].Title), Markup.Escape(screening.VersionLabel),
                 Markup.Escape(screening.Format ?? ""), Markup.Escape(screening.Room ?? ""));
         }
@@ -95,7 +101,18 @@ internal static class ScheduleOutputWriter
             ColorSystem = ColorSystemSupport.NoColors,
             Ansi = AnsiSupport.No
         });
+        if (Console.IsOutputRedirected || output != Console.Out)
+            console.Profile.Width = Math.Max(console.Profile.Width, 180);
         console.Write(table);
+    }
+
+    private static string FormatFinish(Screening screening, Cinema cinema)
+    {
+        if (screening.SourceReportedEndsAt is not { } finish) return "?";
+        var local = TimeZoneInfo.ConvertTime(finish, TimeZoneInfo.FindSystemTimeZoneById(cinema.TimeZone));
+        return DateOnly.FromDateTime(local.DateTime) == screening.ServiceDate
+            ? local.ToString("HH:mm", CultureInfo.InvariantCulture)
+            : local.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
     }
 
     private static async Task WriteAtomicallyAsync(string path, string content, CancellationToken cancellationToken)

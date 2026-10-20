@@ -35,8 +35,13 @@ public static class SnapshotValidator
         var ids = films.Select(film => film.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.Count == films.Count, "Film identities must be unique.");
         foreach (var film in films)
+        {
             Require(!string.IsNullOrWhiteSpace(film.Id) && !string.IsNullOrWhiteSpace(film.Title) &&
                     film.RuntimeMinutes is not <= 0 && !string.IsNullOrWhiteSpace(film.RuntimeProvenance), "Film fields or runtime provenance are invalid.");
+            Require(film.OriginalTitle is null || !string.IsNullOrWhiteSpace(film.OriginalTitle), "Original titles must not be blank.");
+            Require(film.SourceTitle is null || !string.IsNullOrWhiteSpace(film.SourceTitle), "Source titles must not be blank.");
+            Require(film.DetailUrl is null || IsHttpsUrl(film.DetailUrl), "Film detail links must use HTTPS.");
+        }
         return ids;
     }
 
