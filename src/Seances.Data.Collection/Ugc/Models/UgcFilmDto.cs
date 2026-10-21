@@ -1,7 +1,8 @@
 namespace Seances.Data.Collection.Ugc.Models;
 
 /// <summary>Film fields extracted from UGC schedule and detail pages.</summary>
-public sealed record UgcFilmDto(string Id, string Title, string? OriginalTitle = null, Uri? DetailUrl = null)
+public sealed record UgcFilmDto(string Id, string Title, string? OriginalTitle = null, Uri? DetailUrl = null,
+    UgcFilmDetailsDto? Details = null)
 {
     public UgcFilmDto MergeMissing(UgcFilmDto other)
     {
@@ -12,7 +13,8 @@ public sealed record UgcFilmDto(string Id, string Title, string? OriginalTitle =
         return this with
         {
             OriginalTitle = OriginalTitle ?? other.OriginalTitle,
-            DetailUrl = DetailUrl ?? other.DetailUrl
+            DetailUrl = DetailUrl ?? other.DetailUrl,
+            Details = Details ?? other.Details
         };
     }
 }

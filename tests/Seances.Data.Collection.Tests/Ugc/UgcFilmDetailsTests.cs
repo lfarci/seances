@@ -11,13 +11,28 @@ public sealed class UgcFilmDetailsTests
     private static readonly UgcFilmDto MissingFilm = new("42", "LE VOYAGE");
 
     [Fact]
-    public async Task Skips_detail_requests_when_original_title_is_known_or_no_link_exists()
+    public async Task Skips_detail_requests_when_details_are_known_or_no_page_exists()
     {
-        var complete = MissingFilm with { OriginalTitle = "The Journey", DetailUrl = new Uri("https://www.ugc.be/film.html?id=42") };
+        var details = new UgcFilmDetailsDto(90, null, [], [], [], null, null);
+        var complete = MissingFilm with { DetailUrl = new Uri("https://www.ugc.be/film.html?id=42"), Details = details };
+        var eventFilm = new UgcFilmDto("event-555", "EVENING EVENT");
 
-        var films = await _adapter.CollectFilmDetailsAsync([complete, MissingFilm], CancellationToken.None);
+        var films = await _adapter.CollectFilmDetailsAsync([complete, eventFilm], CancellationToken.None);
 
-        Assert.Equal(new[] { complete, MissingFilm }, films);
+        Assert.Equal(new[] { complete, eventFilm }, films);
+    }
+
+    [Fact]
+    public async Task Reads_the_film_page_for_numeric_ids_without_a_card_link()
+    {
+        const string page = """<script type="application/ld+json">{"@type":"Movie","duration":"PT1H46M"}</script>""";
+        var handler = new ScriptedHttpMessageHandler(("/film.html?id=42", page));
+        var adapter = new UgcAdapter(new HttpClient(handler), new AdvancingTimeProvider());
+
+        var film = Assert.Single(await adapter.CollectFilmDetailsAsync([MissingFilm], CancellationToken.None));
+
+        Assert.Equal(106, film.Details?.RuntimeMinutes);
+        Assert.Equal(new Uri("https://www.ugc.be/film.html?id=42"), film.DetailUrl);
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Seances.Data.Storage;
 using Seances.Presentation.Cli.Commands;
 using Seances.Domain;
 using Spectre.Console.Cli;
@@ -46,8 +47,9 @@ public sealed class CollectCommand : AsyncCommand<CollectSettings>
         {
             logger.LogInformation("Starting schedule collection");
             var collector = _collector ?? new UgcScheduleCollector(loggerFactory);
+            var previous = await ReadPreviousSnapshotAsync(settings, logger, cancellationToken);
             var schedule = await collector.CollectAsync(settings.FixtureDirectory, settings.DateSelection,
-                cancellationToken);
+                new FilmEnrichmentInput(previous, settings.TmdbCorrectionsPath), cancellationToken);
             var incomplete = WarnAboutMissingFilmInformation(schedule, logger);
             await ScheduleOutputWriter.WriteAsync(schedule, settings.EffectiveFormat, settings.OutputPath,
                 _output, cancellationToken);
@@ -69,6 +71,27 @@ public sealed class CollectCommand : AsyncCommand<CollectSettings>
             logger.LogError("Collection failed. {ErrorMessage}", error.Message);
             logger.LogDebug(error, "Collection failure details");
             return 1;
+        }
+    }
+
+    private static async Task<ScheduleSnapshot?> ReadPreviousSnapshotAsync(CollectSettings settings, ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (settings.OutputPath is null || settings.EffectiveFormat != "json" || !File.Exists(settings.OutputPath))
+        {
+            return null;
+        }
+        try
+        {
+            await using var stream = File.OpenRead(settings.OutputPath);
+            var previous = await SnapshotJsonSerializer.DeserializeAsync(stream, cancellationToken);
+            logger.LogInformation("Reusing saved film details from {OutputPath}", Path.GetFullPath(settings.OutputPath));
+            return previous;
+        }
+        catch (Exception error) when (error is InvalidDataException or IOException)
+        {
+            logger.LogWarning("Ignoring saved film details in {OutputPath}. {ErrorMessage}", settings.OutputPath, error.Message);
+            return null;
         }
     }
 

@@ -28,6 +28,10 @@ public sealed class CollectSettings : ScheduleCommandSettings
     [Description("Output format: table, json, or csv. Defaults to table on stdout.")]
     public string? Format { get; init; }
 
+    [CommandOption("--tmdb-corrections <PATH>")]
+    [Description("JSON object mapping UGC film IDs to TMDB movie IDs, overriding automatic matches.")]
+    public string? TmdbCorrectionsPath { get; init; }
+
     public string EffectiveFormat => Format?.ToLowerInvariant() ?? (OutputPath is null
         ? "table"
         : Path.GetExtension(OutputPath).ToLowerInvariant() switch
@@ -49,6 +53,8 @@ public sealed class CollectSettings : ScheduleCommandSettings
             return ValidationResult.Error("Choose --format json or csv when the output path does not end in .json or .csv.");
         if (OutputPath is not null && EffectiveFormat == "table")
             return ValidationResult.Error("The table format can only be written to stdout.");
+        if (TmdbCorrectionsPath is not null && !File.Exists(TmdbCorrectionsPath))
+            return ValidationResult.Error("--tmdb-corrections must point to an existing JSON file.");
         return ValidationResult.Success();
     }
 }

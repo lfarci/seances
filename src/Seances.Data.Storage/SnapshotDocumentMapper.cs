@@ -11,7 +11,7 @@ internal static class SnapshotDocumentMapper
         snapshot.Cinemas.Select(cinema => new CinemaDocument(cinema.Id, cinema.Name, cinema.Address, cinema.TimeZone)).ToArray(),
         snapshot.PublishedDates.Select(date => new PublishedDateDocument(date.CinemaId, date.Date, date.SourceUrl, date.FetchedAt, date.ScreeningCount)).ToArray(),
         snapshot.Films.Select(film => new FilmDocument(film.Id, film.Title, film.RuntimeMinutes, film.RuntimeProvenance,
-            film.OriginalTitle, film.SourceTitle, film.DetailUrl)).ToArray(),
+            film.OriginalTitle, film.SourceTitle, film.DetailUrl, ToDocument(film.Details), ToDocument(film.Tmdb))).ToArray(),
         snapshot.Screenings.Select(ToDocument).ToArray());
 
     public static ScheduleSnapshot ToDomain(SnapshotDocument document)
@@ -25,9 +25,31 @@ internal static class SnapshotDocumentMapper
             document.Cinemas.Select(cinema => new Cinema(cinema.Id, cinema.Name, cinema.Address, cinema.TimeZone)).ToArray(),
             document.PublishedDates.Select(date => new PublishedDate(date.CinemaId, date.Date, date.SourceUrl, date.FetchedAt, date.ScreeningCount)).ToArray(),
             document.Films.Select(film => new Film(film.Id, film.Title, film.RuntimeMinutes, film.RuntimeProvenance,
-                film.OriginalTitle, film.SourceTitle, film.DetailUrl)).ToArray(),
+                film.OriginalTitle, film.SourceTitle, film.DetailUrl, ToDomain(film.Details), ToDomain(film.Tmdb))).ToArray(),
             document.Screenings.Select(ToDomain).ToArray());
     }
+
+    private static FilmDetailsDocument? ToDocument(FilmDetails? details) => details is null
+        ? null
+        : new FilmDetailsDocument(details.ReleaseDate, details.Genres.ToArray(), details.Directors.ToArray(),
+            details.Cast.ToArray(), details.Synopsis, details.PosterUrl);
+
+    private static FilmDetails? ToDomain(FilmDetailsDocument? details) => details is null
+        ? null
+        : new FilmDetails(details.ReleaseDate, details.Genres ?? [], details.Directors ?? [], details.Cast ?? [],
+            details.Synopsis, details.PosterUrl);
+
+    private static TmdbFilmMetadataDocument? ToDocument(TmdbFilmMetadata? metadata) => metadata is null
+        ? null
+        : new TmdbFilmMetadataDocument(metadata.TmdbId, metadata.RetrievedAt, metadata.OriginalTitle, metadata.ImdbId,
+            metadata.Synopsis, metadata.SynopsisLanguage, metadata.TrailerUrl, metadata.PosterUrl, metadata.Rating,
+            metadata.VoteCount);
+
+    private static TmdbFilmMetadata? ToDomain(TmdbFilmMetadataDocument? metadata) => metadata is null
+        ? null
+        : new TmdbFilmMetadata(metadata.TmdbId, metadata.RetrievedAt, metadata.OriginalTitle, metadata.ImdbId,
+            metadata.Synopsis, metadata.SynopsisLanguage, metadata.TrailerUrl, metadata.PosterUrl, metadata.Rating,
+            metadata.VoteCount);
 
     private static ScreeningDocument ToDocument(Screening screening) => new(
         screening.Id, screening.CinemaId, screening.FilmId, screening.ServiceDate, screening.StartsAt,

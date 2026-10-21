@@ -25,6 +25,9 @@ internal static class UgcSourceConfiguration
 
     public static Uri CinemaPageUrl(string path) => new(new Uri(BaseUrl), path);
 
+    public static Uri? FilmPageUrl(string filmId) =>
+        filmId.Length > 0 && filmId.All(char.IsAsciiDigit) ? new Uri($"{BaseUrl}/film.html?id={filmId}") : null;
+
     public static Uri ScheduleFragmentUrl(string cinemaId, DateOnly serviceDate) => new(
         $"{BaseUrl}/showingsCinemaAjaxAction!getShowingsForCinemaPage.action" +
         $"?cinemaId={Uri.EscapeDataString(cinemaId)}&date={serviceDate.ToString(ServiceDateFormat, CultureInfo.InvariantCulture)}&page={FragmentPageParameter}");

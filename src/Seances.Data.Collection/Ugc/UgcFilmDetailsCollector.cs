@@ -15,35 +15,34 @@ internal sealed class UgcFilmDetailsCollector(UgcHttpClient requests, ILogger lo
         foreach (var film in films)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (HasCompleteMetadata(film))
+            var detailUrl = film.DetailUrl ?? UgcSourceConfiguration.FilmPageUrl(film.Id);
+            if (film.Details is not null || detailUrl is null)
             {
                 enriched.Add(film);
                 continue;
             }
 
             _logger.LogInformation("Reading film details: {FilmTitle} ({FilmId})", film.Title, film.Id);
-            enriched.Add(await CollectOneAsync(film, cancellationToken));
+            enriched.Add(await CollectOneAsync(film, detailUrl, cancellationToken));
         }
         return enriched;
     }
 
-    private async Task<UgcFilmDto> CollectOneAsync(UgcFilmDto film, CancellationToken cancellationToken)
+    private async Task<UgcFilmDto> CollectOneAsync(UgcFilmDto film, Uri detailUrl, CancellationToken cancellationToken)
     {
         try
         {
-            var html = await requests.GetStringAsync(film.DetailUrl!, cancellationToken);
-            return UgcFilmParser.ParseDetails(html, film);
+            var html = await requests.GetStringAsync(detailUrl, cancellationToken);
+            var parsed = UgcFilmParser.ParseDetails(html, film);
+            return parsed.Details is null ? parsed : parsed with { DetailUrl = detailUrl };
         }
         catch (Exception error) when (IsOptionalSourceFailure(error, cancellationToken))
         {
             _logger.LogDebug(error, "Film details unavailable for {FilmTitle} ({FilmId}) at {DetailUrl}",
-                film.Title, film.Id, film.DetailUrl);
+                film.Title, film.Id, detailUrl);
             return film;
         }
     }
-
-    private static bool HasCompleteMetadata(UgcFilmDto film) =>
-        film.DetailUrl is null || film.OriginalTitle is not null;
 
     private static bool IsOptionalSourceFailure(Exception error, CancellationToken cancellationToken) =>
         error is HttpRequestException or InvalidDataException ||

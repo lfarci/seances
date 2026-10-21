@@ -7,6 +7,7 @@ namespace Seances.Data.Collection.Ugc.Mapping;
 public static class UgcScheduleMapper
 {
     private const string RuntimeNotCollected = "not collected";
+    private const string RuntimeFromFilmPage = "UGC film page";
 
     public static ScheduleSnapshot ToSnapshot(IReadOnlyList<UgcScheduleDateDto> collected, DateTimeOffset checkedAt, string source,
         IReadOnlyList<UgcFilmDto>? enrichedFilms = null)
@@ -29,7 +30,13 @@ public static class UgcScheduleMapper
         .Select(group => group.Aggregate((current, next) => current.MergeMissing(next))).ToArray();
 
     private static Film ToDomain(UgcFilmDto film) => new(film.Id, film.OriginalTitle ?? film.Title,
-        null, RuntimeNotCollected, film.OriginalTitle, film.Title, film.DetailUrl);
+        film.Details?.RuntimeMinutes, film.Details?.RuntimeMinutes is null ? RuntimeNotCollected : RuntimeFromFilmPage,
+        film.OriginalTitle, film.Title, film.DetailUrl, ToDomain(film.Details));
+
+    private static FilmDetails? ToDomain(UgcFilmDetailsDto? details) => details is null
+        ? null
+        : new FilmDetails(details.ReleaseDate, details.Genres, details.Directors, details.Cast, details.Synopsis,
+            details.PosterUrl);
 
     private static Screening ToDomain(UgcScreeningDto screening) => new(
         screening.Id,

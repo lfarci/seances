@@ -25,7 +25,8 @@ public static class UgcFilmParser
     {
         var document = new HtmlParser().ParseDocument(html);
         var originalTitle = FindOriginalTitle(document.DocumentElement);
-        return film.MergeMissing(new UgcFilmDto(film.Id, film.Title, originalTitle));
+        var details = UgcFilmJsonLdParser.Parse(document);
+        return film.MergeMissing(new UgcFilmDto(film.Id, film.Title, originalTitle, Details: details));
     }
 
     private static IEnumerable<IElement> Candidates(IElement element, string selector)
