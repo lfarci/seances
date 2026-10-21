@@ -267,6 +267,56 @@ public sealed class CollectCommandTests
         Assert.Contains("Collection failed. source unavailable", error.ToString());
     }
 
+    [Fact]
+    public async Task Passes_the_existing_json_output_and_corrections_to_collection()
+    {
+        var directory = CreateTemporaryDirectory();
+        var path = Path.Combine(directory, "schedule.json");
+        var corrections = Path.Combine(directory, "tmdb.json");
+        try
+        {
+            await File.WriteAllTextAsync(path, Seances.Data.Storage.SnapshotJsonSerializer.Serialize(CreateSchedule()));
+            await File.WriteAllTextAsync(corrections, """{"film-1": 42}""");
+            var collector = new FakeScheduleCollector(CreateSchedule());
+            using var output = new StringWriter();
+            using var error = new StringWriter();
+
+            var result = await new CollectCommand(collector, output, error).ExecuteAsync(null!, new CollectSettings
+            { FixtureDirectory = "fixtures", OutputPath = path, TmdbCorrectionsPath = corrections }, CancellationToken.None);
+
+            Assert.Equal(0, result);
+            Assert.Equal("film-1", Assert.Single(collector.Enrichment!.PreviousSnapshot!.Films).Id);
+            Assert.Equal(corrections, collector.Enrichment.TmdbCorrectionsPath);
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public async Task Missing_corrections_file_is_rejected()
+    {
+        var collector = new FakeScheduleCollector(CreateSchedule());
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var result = await new CollectCommand(collector, output, error).ExecuteAsync(null!, new CollectSettings
+        { FixtureDirectory = "fixtures", TmdbCorrectionsPath = "missing.json" }, CancellationToken.None);
+
+        Assert.Equal(2, result);
+        Assert.False(collector.WasCalled);
+    }
+
+    [Theory]
+    [InlineData("""{"film-1": 0}""")]
+    [InlineData("""{"film-1": "abc"}""")]
+    public async Task Invalid_corrections_are_rejected(string json)
+    {
+        var path = Path.Combine(CreateTemporaryDirectory(), "tmdb.json");
+        await File.WriteAllTextAsync(path, json);
+
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            UgcScheduleCollector.ReadCorrectionsAsync(path, CancellationToken.None));
+    }
+
     private static ScheduleSnapshot CreateSchedule()
     {
         var cinema = new Cinema("cinema-1", "Central Cinema", "Brussels", Cinema.BrusselsTimeZoneId);
@@ -292,10 +342,13 @@ public sealed class CollectCommandTests
     {
         public bool WasCalled { get; private set; }
 
+        public FilmEnrichmentInput? Enrichment { get; private set; }
+
         public Task<ScheduleSnapshot> CollectAsync(string? fixtureDirectory, ScheduleDateSelection? dateSelection,
-            CancellationToken cancellationToken)
+            FilmEnrichmentInput enrichment, CancellationToken cancellationToken)
         {
             WasCalled = true;
+            Enrichment = enrichment;
             return failure is null ? Task.FromResult(schedule) : Task.FromException<ScheduleSnapshot>(failure);
         }
     }

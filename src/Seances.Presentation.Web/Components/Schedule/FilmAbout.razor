@@ -1,0 +1,44 @@
+@if (Info.HasAbout)
+{
+    <section class="film-about" aria-labelledby="film-about-heading">
+        <h4 id="film-about-heading">About the film</h4>
+        @if (Info.Synopsis is not null)
+        {
+            <p class="film-synopsis" lang="@Info.SynopsisLanguage">@Info.Synopsis</p>
+        }
+        <dl class="details-list">
+            @if (Info.Directors is not null)
+            {
+                <dt>Director</dt><dd>@Info.Directors</dd>
+            }
+            @if (Info.Cast is not null)
+            {
+                <dt>Cast</dt><dd>@Info.Cast</dd>
+            }
+            @if (Info.Genres is not null)
+            {
+                <dt>Genres</dt><dd>@Info.Genres</dd>
+            }
+            @if (Info.ReleaseText is not null)
+            {
+                <dt>Release</dt><dd>@Info.ReleaseText</dd>
+            }
+            @if (Info.RatingText is not null)
+            {
+                <dt>Rating</dt><dd>@Info.RatingText</dd>
+            }
+        </dl>
+        @if (Info.UsesTmdb)
+        {
+            <p class="tmdb-attribution">
+                Film data from <a href="@Info.TmdbUrl" target="_blank" rel="external noopener noreferrer">TMDB</a>.
+                This product uses the TMDB API but is not endorsed or certified by TMDB.
+            </p>
+        }
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public FilmInfoView Info { get; set; } = null!;
+}

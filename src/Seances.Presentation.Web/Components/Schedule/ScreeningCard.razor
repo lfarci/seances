@@ -1,6 +1,6 @@
-<button type="button" class="@(Mobile ? "mobile-showing" : "showing")" aria-pressed="@(Selected ? "true" : "false")"
+<button type="button" class="@CssClass" aria-pressed="@(Selected ? "true" : "false")"
         aria-expanded="@(Selected ? "true" : "false")" aria-controls="@(Selected ? "screening-details" : null)"
-        aria-label="@Screening.StartText to @Screening.FinishText (estimated finish), @Screening.Film.Title, @(Screening.Room). Show screening details"
+        aria-label="@AriaLabel"
         @ref="_button" @onclick="SelectScreening">
     @if (Mobile)
     {
@@ -42,7 +42,16 @@
     public bool Selected { get; set; }
 
     [Parameter]
+    public bool SameFilm { get; set; }
+
+    [Parameter]
     public bool DetailsOpen { get; set; }
+
+    private string AriaLabel =>
+        $"{Screening.StartText} to {Screening.FinishText} (estimated finish), {Screening.Film.Title}, {Screening.Room}" +
+        (SameFilm ? ", another screening of the selected film" : "") + ". Show screening details";
+
+    private string CssClass => (Mobile ? "mobile-showing" : "showing") + (SameFilm ? " is-same-film" : "");
 
     [Parameter]
     public EventCallback<SchedulePageModel.ShowingView> OnSelected { get; set; }

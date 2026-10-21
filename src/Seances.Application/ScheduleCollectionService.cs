@@ -10,27 +10,41 @@ using Seances.Domain;
 namespace Seances.Application;
 
 /// <summary>Collects a complete schedule from UGC or deterministic fixture responses.</summary>
-public sealed class ScheduleCollectionService(UgcAdapter adapter, TimeProvider clock, ILogger<ScheduleCollectionService>? logger = null)
+public sealed class ScheduleCollectionService(UgcAdapter adapter, TimeProvider clock, ILogger<ScheduleCollectionService>? logger = null,
+    FilmEnrichmentOptions? enrichment = null)
 {
     private readonly ILogger<ScheduleCollectionService> _logger = logger ?? NullLogger<ScheduleCollectionService>.Instance;
     private static readonly JsonSerializerOptions FixtureJson = new(JsonSerializerDefaults.Web);
     private static readonly TimeSpan MaximumCollectionDuration = TimeSpan.FromMinutes(30);
 
+    /// <summary>Collects schedules, reusing film details and TMDB matches saved in <paramref name="previousSnapshot"/>.</summary>
     public async Task<ScheduleSnapshot> CollectAsync(string? fixtureDirectory, ScheduleDateSelection? dateSelection = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, ScheduleSnapshot? previousSnapshot = null)
     {
         using var boundedRun = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         boundedRun.CancelAfter(MaximumCollectionDuration);
         var collected = fixtureDirectory is null
             ? await adapter.CollectAsync(boundedRun.Token, dateSelection)
             : await ReadFixturesAsync(fixtureDirectory, dateSelection, boundedRun.Token);
+        var previousFilms = (previousSnapshot?.Films ?? []).ToDictionary(film => film.Id, StringComparer.Ordinal);
         var films = UgcScheduleMapper.MergeFilms(collected.SelectMany(item => item.Films));
-        _logger.LogInformation("Checking metadata for {FilmCount} films", films.Count);
-        films = fixtureDirectory is null
-            ? await adapter.CollectFilmDetailsAsync(films, boundedRun.Token)
-            : await ReadFilmFixturesAsync(fixtureDirectory, films, boundedRun.Token);
+        var filmsToRead = films.Where(film => previousFilms.GetValueOrDefault(film.Id)?.Details is null).ToArray();
+        _logger.LogInformation("Checking metadata for {FilmCount} films ({SavedFilmCount} reused from the previous snapshot)",
+            films.Count, films.Count - filmsToRead.Length);
+        var read = fixtureDirectory is null
+            ? await adapter.CollectFilmDetailsAsync(filmsToRead, boundedRun.Token)
+            : await ReadFilmFixturesAsync(fixtureDirectory, filmsToRead, boundedRun.Token);
+        var readById = read.ToDictionary(film => film.Id, StringComparer.Ordinal);
+        films = films.Select(film => readById.GetValueOrDefault(film.Id) ?? film).ToArray();
         var source = fixtureDirectory is null ? "UGC" : "synthetic fixture responses";
-        return UgcScheduleMapper.ToSnapshot(collected, clock.GetUtcNow(), source, films);
+        var snapshot = UgcScheduleMapper.ToSnapshot(collected, clock.GetUtcNow(), source, films);
+
+        var workflow = new FilmEnrichmentWorkflow(enrichment ?? FilmEnrichmentOptions.None, clock, _logger);
+        var withSavedDetails = snapshot.Films
+            .Select(film => FilmEnrichmentWorkflow.ReusePreviousDetails(film, previousFilms.GetValueOrDefault(film.Id)))
+            .ToArray();
+        var enriched = await workflow.EnrichAsync(withSavedDetails, previousFilms, boundedRun.Token);
+        return snapshot with { Films = enriched };
     }
 
     private async Task<IReadOnlyList<UgcScheduleDateDto>> ReadFixturesAsync(string directory, ScheduleDateSelection? dateSelection,

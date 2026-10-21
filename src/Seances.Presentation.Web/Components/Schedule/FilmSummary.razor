@@ -1,0 +1,43 @@
+@if (Info.PosterUrl is not null || Info.HasLinks)
+{
+    <div class="film-summary">
+        @if (Info.PosterUrl is not null)
+        {
+            <img class="film-poster" src="@Info.PosterUrl" alt="Poster for @Title" referrerpolicy="no-referrer" />
+        }
+        @if (Info.HasLinks)
+        {
+            <ul class="film-links" aria-label="Film links">
+                @if (Info.TrailerUrl is not null)
+                {
+                    <li>
+                        <a href="@Info.TrailerUrl" target="_blank" rel="external noopener noreferrer">
+                            <svg class="film-link-icon" viewBox="0 0 20 20" aria-hidden="true">
+                                <rect x="1.5" y="3.5" width="17" height="13" rx="3" />
+                                <path class="play" d="M8.25 7.1v5.8l4.9-2.9z" />
+                            </svg>
+                            Watch trailer<span class="visually-hidden"> on YouTube (opens in a new tab)</span>
+                        </a>
+                    </li>
+                }
+                @if (Info.ImdbUrl is not null)
+                {
+                    <li>
+                        <a href="@Info.ImdbUrl" target="_blank" rel="external noopener noreferrer">
+                            <span class="imdb-badge" aria-hidden="true">IMDb</span>
+                            View on IMDb<span class="visually-hidden"> (opens in a new tab)</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public FilmInfoView Info { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+}

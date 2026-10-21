@@ -13,9 +13,21 @@ dotnet run --project src/Seances.Presentation.Cli -- inspect --help
 
 `collect` extracts schedule data and prints a formatted table by default. Use `--format json` or `--format csv` to write machine-readable output to stdout. Use `--output <path>` to write JSON or CSV to a file; `.json` and `.csv` select the format when `--format` is omitted. Relative output paths resolve from the current directory. File output is atomic, so a failed collection or write preserves an existing destination. Status messages go to stderr.
 
-Film titles prefer an explicitly reported original title, in the original language, and fall back to the UGC title. JSON preserves `originalTitle`, `sourceTitle`, and `detailUrl` alongside the film ID. Existing version 1 JSON snapshots without these additional fields remain readable. CSV and table output retain runtime support for saved data, but collection does not scrape runtime or screening format. Finish times after the service date include the calendar date.
+Film titles prefer an explicitly reported original title, in the original language, and fall back to the UGC title. JSON preserves `originalTitle`, `sourceTitle`, and `detailUrl` alongside the film ID. Existing version 1 JSON snapshots without these additional fields remain readable. Finish times after the service date include the calendar date.
 
-Collection merges available identifiers and original-title metadata for repeated films before fetching each linked film detail page, at most once per run, when the original title is missing. Missing fields remain unknown; runtime is never inferred from screening start and finish. Optional film-detail failures preserve the available schedule; required schedule failures return a nonzero exit status.
+Collection reads each film's UGC page once, using the card link or `film.html?id=<film ID>` for numeric IDs. Its schema.org JSON-LD block supplies the runtime, release date, genres, director, cast, French synopsis, and poster in the JSON `details` object; runtime provenance is `UGC film page`. Missing fields remain unknown; runtime is never inferred from screening start and finish. Optional film-page failures preserve the available schedule; required schedule failures return a nonzero exit status.
+
+### TMDB enrichment
+
+Live collection adds TMDB metadata in the JSON `tmdb` object: TMDB and IMDb IDs, an English (otherwise French) synopsis, an official YouTube trailer link, a poster, a rating, and the original title when UGC has none. Set `SEANCES_TMDB_TOKEN` to a TMDB API read access token; without it, collection warns and continues. Fixture collection never contacts TMDB. See [film enrichment](tmdb-enrichment.md) for matching rules and usage terms.
+
+TMDB matches are confirmed by the UGC director, or by a runtime within 5 minutes, among results for the title and UGC release year. Unconfirmed films keep no TMDB data. To fix or force a match, pass `--tmdb-corrections <path>` with a JSON object mapping UGC film IDs to TMDB movie IDs:
+
+```json
+{ "9860": 1236153 }
+```
+
+When `--output` names an existing JSON snapshot, collection reuses its film details and TMDB metadata younger than six months instead of requesting them again.
 
 Collection and Application use typed `ILogger<T>` entries with structured cinema, date, film, request, and retry properties. The CLI renders these entries to stderr: normal logs show progress, one warning per film with missing original title or detail URL, and a completion summary. Missing screening finishes are summarized separately. Add `--verbose` to include debug entries for requests, retries, and failures. Warnings do not change a successful collection's exit status.
 

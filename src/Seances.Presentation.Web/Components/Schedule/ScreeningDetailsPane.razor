@@ -7,8 +7,12 @@
         <h3>@Screening.Film.Title</h3>
         <p class="details-version">@Screening.Screening.VersionLabel</p>
     </div>
+    <FilmSummary Info="Screening.FilmInfo" Title="@Screening.Film.Title" />
     <dl class="details-list">
-        <dt>Format</dt><dd>@(Screening.Screening.Format ?? "Unavailable")</dd>
+        @if (Screening.Screening.Format is not null)
+        {
+            <dt>Format</dt><dd>@Screening.Screening.Format</dd>
+        }
         <dt>Runtime</dt><dd>@Screening.RuntimeText</dd>
         <dt>Estimated finish</dt>
         <dd>@Screening.FinishText <span class="details-note">@Screening.FinishDescription@if (Screening.Finish.Label is not null) { <span> · @Screening.Finish.Label</span> }</span></dd>
@@ -25,6 +29,7 @@
     {
         <p class="booking-unavailable">Booking link unavailable.</p>
     }
+    <FilmAbout Info="Screening.FilmInfo" />
 </aside>
 
 @code {

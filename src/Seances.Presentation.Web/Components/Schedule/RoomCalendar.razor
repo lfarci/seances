@@ -19,7 +19,7 @@
                     @foreach (var block in blocks)
                     {
                         <div class="calendar-block" style="@BlockStyle(block)">
-                            <ScreeningCard Screening="block.Showing" Selected="@(block.Showing.Screening.Id == SelectedScreening?.Screening.Id)" DetailsOpen="@(SelectedScreening is not null)" OnSelected="OnScreeningSelected" />
+                            <ScreeningCard Screening="block.Showing" Selected="@(block.Showing.Screening.Id == SelectedScreening?.Screening.Id)" SameFilm="@block.Showing.IsOtherScreeningOf(SelectedScreening)" DetailsOpen="@(SelectedScreening is not null)" OnSelected="OnScreeningSelected" />
                         </div>
                     }
                 </section>

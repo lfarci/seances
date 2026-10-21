@@ -41,8 +41,27 @@ public static class SnapshotValidator
             Require(film.OriginalTitle is null || !string.IsNullOrWhiteSpace(film.OriginalTitle), "Original titles must not be blank.");
             Require(film.SourceTitle is null || !string.IsNullOrWhiteSpace(film.SourceTitle), "Source titles must not be blank.");
             Require(film.DetailUrl is null || IsHttpsUrl(film.DetailUrl), "Film detail links must use HTTPS.");
+            if (film.Details is not null) ValidateDetails(film.Details);
+            if (film.Tmdb is not null) ValidateTmdb(film.Tmdb);
         }
         return ids;
+    }
+
+    private static void ValidateDetails(FilmDetails details)
+    {
+        Require(details.Genres.Concat(details.Directors).Concat(details.Cast).All(value => !string.IsNullOrWhiteSpace(value)),
+            "Film genres, directors, and cast must not be blank.");
+        Require(details.Synopsis is null || !string.IsNullOrWhiteSpace(details.Synopsis), "Film synopses must not be blank.");
+        Require(details.PosterUrl is null || IsHttpsUrl(details.PosterUrl), "Film poster links must use HTTPS.");
+    }
+
+    private static void ValidateTmdb(TmdbFilmMetadata metadata)
+    {
+        Require(metadata.TmdbId > 0 && metadata.RetrievedAt != default, "TMDB metadata requires a movie ID and retrieval time.");
+        Require(metadata.TrailerUrl is null || IsHttpsUrl(metadata.TrailerUrl), "Trailer links must use HTTPS.");
+        Require(metadata.PosterUrl is null || IsHttpsUrl(metadata.PosterUrl), "TMDB poster links must use HTTPS.");
+        Require(metadata.Rating is null or >= 0 and <= 10 && metadata.VoteCount is null or >= 0, "TMDB ratings are out of range.");
+        Require(metadata.Synopsis is null || !string.IsNullOrWhiteSpace(metadata.Synopsis), "TMDB synopses must not be blank.");
     }
 
     private static HashSet<(string CinemaId, DateOnly Date)> ValidatePublishedDates(
