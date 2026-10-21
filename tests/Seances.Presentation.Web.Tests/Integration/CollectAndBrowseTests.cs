@@ -59,9 +59,35 @@ public sealed class CollectAndBrowseTests
             Assert.Contains("EVENING EVENT", toisonText);
             Assert.Contains("UGC Toison d’Or", toisonText);
             Assert.Contains("Room unavailable", toisonText);
-            Assert.Contains("Choose a screening", toisonText);
-            Assert.Single(toisonPage.QuerySelectorAll(".screening-details"));
+            Assert.DoesNotContain("Choose a screening", toisonText);
+            Assert.DoesNotContain("This schedule may be out of date.", toisonText);
+            Assert.NotNull(toisonPage.QuerySelector(".filter-form #service-date"));
+            Assert.NotNull(toisonPage.QuerySelector(".filter-form #calendar-cinema"));
+            Assert.NotNull(toisonPage.QuerySelector(".filter-form #calendar-room"));
+            Assert.Null(toisonPage.QuerySelector(".filter-form button"));
+            Assert.Equal("Schedule filters", toisonPage.QuerySelector(".filter-form")!.GetAttribute("aria-label"));
+            Assert.Empty(toisonPage.QuerySelectorAll(".screening-details"));
+            Assert.Null(toisonPage.QuerySelector(".calendar-workspace.has-selection"));
+            Assert.NotNull(toisonPage.QuerySelector(".date-navigation #service-date"));
+            Assert.NotNull(toisonPage.QuerySelector(".calendar-help + .calendar-workspace"));
+            Assert.Null(toisonPage.QuerySelector(".calendar-content .calendar-help"));
             Assert.Empty(toisonPage.QuerySelectorAll(".details-list"));
+            Assert.Equal(2, toisonPage.QuerySelectorAll(".calendar-block").Length);
+            Assert.Equal(2, toisonPage.QuerySelectorAll(".room-heading").Length);
+            Assert.Equal(2, toisonPage.QuerySelectorAll(".room-track").Length);
+            Assert.Contains("--timeline-width:", toisonPage.QuerySelector(".calendar")!.GetAttribute("style"));
+            Assert.NotNull(toisonPage.QuerySelector("label[for='calendar-room']"));
+            Assert.Equal("All rooms (2)", toisonPage.QuerySelector("#calendar-room option")!.TextContent.Trim());
+            Assert.All(toisonPage.QuerySelectorAll(".calendar-block"), block =>
+            {
+                Assert.Contains("width:", block.GetAttribute("style"));
+                Assert.Contains("left:", block.GetAttribute("style"));
+                Assert.Contains("calc((100% - 2rem)", block.GetAttribute("style"));
+                Assert.Contains("estimated finish", block.QuerySelector("button")!.GetAttribute("aria-label"));
+                Assert.NotNull(block.QuerySelector(".showing-start"));
+                Assert.False(string.IsNullOrWhiteSpace(block.QuerySelector(".showing-language")!.TextContent));
+                Assert.DoesNotContain("est.", block.TextContent);
+            });
             Assert.All(toisonPage.QuerySelectorAll(".showing, .mobile-showing"), card =>
             {
                 Assert.Equal("BUTTON", card.TagName);
@@ -70,10 +96,9 @@ public sealed class CollectAndBrowseTests
             });
             Assert.DoesNotContain("PRESSURE", toisonText);
             Assert.DoesNotContain("UPCOMING FILM WITHOUT SCREENINGS", toisonText);
-            var nextCinemaLink = toisonPage.QuerySelectorAll(".cinema-picker a")
-                .Single(link => link.TextContent.Trim() == "UGC De Brouckère");
-            Assert.Contains("date=2026-10-17", nextCinemaLink.GetAttribute("href"));
-            Assert.Contains("cinema=2", nextCinemaLink.GetAttribute("href"));
+            var cinemaOptions = toisonPage.QuerySelectorAll("#calendar-cinema option");
+            Assert.Equal("1", cinemaOptions.Single(option => option.HasAttribute("selected")).GetAttribute("value"));
+            Assert.Equal("2", cinemaOptions.Single(option => option.TextContent.Trim() == "UGC De Brouckère").GetAttribute("value"));
             Assert.Equal(new[] { "19:30", "23:10" }, toisonPage.QuerySelectorAll(".mobile-showings .mobile-time")
                 .Select(time => time.TextContent.Trim()).ToArray());
 
@@ -84,8 +109,43 @@ public sealed class CollectAndBrowseTests
             Assert.Equal(HttpStatusCode.OK, deBrouckereResponse.StatusCode);
             Assert.Contains("PRESSURE", deBrouckereText);
             Assert.Contains("UGC De Brouckère", deBrouckereText);
-            Assert.Contains("Choose a screening", deBrouckereText);
+            Assert.DoesNotContain("Choose a screening", deBrouckereText);
             Assert.DoesNotContain("EVENING EVENT", deBrouckereText);
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+    }
+
+    [Theory]
+    [InlineData("Salle 4", 1, "19:30")]
+    [InlineData("Room unavailable", 1, "23:10")]
+    [InlineData("missing", 2, null)]
+    public async Task Room_filter_applies_to_calendar_and_mobile_list_and_unknown_rooms_reset(
+        string room, int count, string? startText)
+    {
+        var temporaryDirectory = CreateTemporaryDirectory();
+        var snapshotPath = Path.Combine(temporaryDirectory, "schedule.json");
+        try
+        {
+            await CollectAndPublishFixtureSnapshotAsync(snapshotPath);
+            await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll<LocalSnapshotStore>();
+                    services.AddSingleton(new LocalSnapshotStore(snapshotPath));
+                }));
+            using var client = factory.CreateClient();
+            var html = await client.GetStringAsync($"/?date=2026-10-17&cinema=1&room={Uri.EscapeDataString(room)}");
+            var page = await new HtmlParser().ParseDocumentAsync(html);
+
+            Assert.Equal(count, page.QuerySelectorAll(".calendar-block").Length);
+            Assert.Equal(count, page.QuerySelectorAll(".mobile-showing").Length);
+            var selectedOption = page.QuerySelector("#calendar-room option[selected]")!;
+            Assert.Equal(startText is null ? "" : room, selectedOption.GetAttribute("value"));
+            if (startText is not null)
+                Assert.Equal(startText, page.QuerySelector(".mobile-time")!.TextContent.Trim());
         }
         finally
         {

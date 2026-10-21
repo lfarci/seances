@@ -1,24 +1,20 @@
-@using System.Globalization
-@using Microsoft.AspNetCore.WebUtilities
-
-<nav class="cinema-picker" aria-label="Choose a cinema">
-    @foreach (var cinema in Model.Cinemas)
-    {
-        <a href="@ScheduleUrl(Model.Date, cinema.Id)"
-           aria-current="@(cinema.Id == Model.Cinema.Id ? "page" : null)">
-            @cinema.Name
-        </a>
-    }
-</nav>
+<div class="filter-field cinema-filter">
+    <label for="calendar-cinema">Cinema</label>
+    <select id="calendar-cinema" name="cinema" value="@Model.Cinema.Id" @onchange="ChangeCinema">
+        @foreach (var cinema in Model.Cinemas)
+        {
+            <option value="@cinema.Id" selected="@(cinema.Id == Model.Cinema.Id)">@cinema.Name</option>
+        }
+    </select>
+</div>
 
 @code {
     [Parameter, EditorRequired]
     public SchedulePageModel Model { get; set; } = null!;
 
-    private static string ScheduleUrl(DateOnly date, string cinemaId) => QueryHelpers.AddQueryString("/",
-        new Dictionary<string, string?>
-        {
-            ["date"] = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            ["cinema"] = cinemaId
-        });
+    [Parameter]
+    public EventCallback<string> OnChanged { get; set; }
+
+    private Task ChangeCinema(ChangeEventArgs args) => OnChanged.InvokeAsync(args.Value?.ToString() ?? Model.Cinema.Id);
+
 }

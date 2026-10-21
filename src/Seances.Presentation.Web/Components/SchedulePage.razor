@@ -22,22 +22,16 @@
             <p class="intro">Browse showtimes by cinema, room, and time.</p>
         </header>
 
-        <CinemaPicker Model="_model" />
-
         <section class="schedule" aria-labelledby="schedule-heading">
             <div class="schedule-toolbar">
                 <div>
                     <h2 id="schedule-heading">@_model.Cinema.Name</h2>
                     <p class="address">@_model.Cinema.Address</p>
                 </div>
-                <ScheduleDateControls Model="_model" />
+                <p class="freshness">Schedule checked @_model.CheckedAtText Brussels time</p>
             </div>
 
-            <p class="freshness">Schedule checked @_model.CheckedAtText Brussels time</p>
-            @if (_model.IsStale)
-            {
-                <p class="notice stale-notice" role="status">This schedule may be out of date.</p>
-            }
+            <ScheduleFilters Model="_model" />
 
             <ScreeningCalendar Model="_model" SelectedScreening="_selectedScreening" OnScreeningSelected="SelectScreening" OnScreeningClosed="CloseScreening" />
         </section>
