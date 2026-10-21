@@ -23,5 +23,11 @@ public sealed record SchedulePageModel(
         string FinishText,
         string FinishDescription,
         string RuntimeText,
-        FinishInfo Finish);
+        FinishInfo Finish)
+    {
+        public FilmInfoView FilmInfo { get; } = FilmInfoView.Create(Film);
+
+        public bool IsOtherScreeningOf(ShowingView? selected) =>
+            selected is not null && Screening.Id != selected.Screening.Id && Screening.FilmId == selected.Screening.FilmId;
+    }
 }

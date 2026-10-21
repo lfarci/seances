@@ -433,6 +433,19 @@ button:hover {
     color: #fff;
 }
 
+.showing.is-same-film,
+.mobile-showing.is-same-film {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.showing.is-same-film:hover,
+.mobile-showing.is-same-film:hover {
+    border-color: var(--accent-dark);
+    box-shadow: inset 0 0 0 1px var(--accent-dark);
+}
+
 .showing[aria-pressed="true"] .showing-start,
 .showing[aria-pressed="true"] .showing-language {
     color: inherit;
@@ -596,6 +609,105 @@ button:hover {
 
 .booking-link:hover {
     background: var(--accent-dark);
+}
+
+.film-summary {
+    display: grid;
+    gap: .75rem;
+    margin-top: 1rem;
+}
+
+.film-poster {
+    width: min(100%, 12rem);
+    aspect-ratio: 2 / 3;
+    border: 1px solid var(--line);
+    border-radius: .35rem;
+    background: var(--time-header);
+    object-fit: cover;
+    box-shadow: 0 .35rem .9rem rgb(38 33 29 / .18);
+}
+
+.film-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.film-links a {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem .7rem;
+    border: 1px solid var(--control-line);
+    border-radius: .35rem;
+    background: var(--paper);
+    color: var(--accent-dark);
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.film-links a:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.film-link-icon {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: var(--accent);
+}
+
+.film-link-icon .play {
+    fill: #fff;
+}
+
+.imdb-badge {
+    flex: none;
+    padding: .1rem .3rem;
+    border-radius: .2rem;
+    background: #f5c518;
+    color: #000;
+    font: 900 .75rem/1.2 Impact, "Arial Black", var(--font-ui);
+    letter-spacing: .01em;
+}
+
+.film-about {
+    margin-top: 1.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+}
+
+.film-about h4 {
+    margin: 0 0 .6rem;
+    font: 600 1.15rem/1.3 var(--font-display);
+}
+
+.film-synopsis {
+    max-width: 65ch;
+    margin: 0;
+    line-height: 1.55;
+}
+
+.film-about .details-list {
+    margin: .4rem 0 0;
+}
+
+.tmdb-attribution {
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: .8125rem;
+    line-height: 1.45;
+}
+
+.tmdb-attribution a {
+    color: var(--accent-dark);
 }
 
 .mobile-showings {
