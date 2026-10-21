@@ -2,7 +2,7 @@
     @foreach (var screening in Screenings)
     {
         <li>
-            <ScreeningCard Screening="screening" Mobile="true" Selected="@(screening.Screening.Id == SelectedScreening?.Screening.Id)" OnSelected="OnScreeningSelected" />
+            <ScreeningCard Screening="screening" Mobile="true" Selected="@(screening.Screening.Id == SelectedScreening?.Screening.Id)" DetailsOpen="@(SelectedScreening is not null)" OnSelected="OnScreeningSelected" />
         </li>
     }
 </ol>

@@ -1,40 +1,47 @@
 @using System.Globalization
 
-<div class="calendar-scroll" role="region" tabindex="0"
-     aria-label="Screening calendar for @Model.Cinema.Name on @(Model.Date.ToString("d MMMM yyyy", DisplayCulture)). Scroll horizontally to see more rooms.">
-    <table class="calendar">
-        <caption class="visually-hidden">Showtimes for @Model.Cinema.Name on @Model.Date.ToString("d MMMM yyyy", DisplayCulture)</caption>
-        <thead>
-            <tr>
-                <th scope="col" class="time-heading">Time</th>
-                @foreach (var room in Model.Rooms)
+<div class="room-calendar">
+    <div class="calendar-scroll" role="region" tabindex="0"
+         aria-label="Screening calendar for @Model.Cinema.Name on @(Model.Date.ToString("d MMMM yyyy", DisplayCulture)). Scroll to see more times and rooms.">
+        <div class="calendar" style="@TimelineStyle">
+            <div class="time-heading">Room / Time</div>
+            <div class="time-axis" aria-hidden="true">
+                @foreach (var tick in Timeline.Ticks.Where(tick => tick.OffsetMinutes % 60 == 0))
                 {
-                    <th scope="col">@room</th>
+                    <span class="time-cell" style="@FormattableString.Invariant($"left: calc((100% - 2rem) * {tick.OffsetMinutes / (double)Timeline.Minutes})")">@tick.Text</span>
                 }
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var row in Model.CalendarRows)
+            </div>
+            @foreach (var room in VisibleRooms)
             {
-                <tr>
-                    <th scope="row" class="time-cell"><time datetime="@row.StartsAt.ToString("O")">@row.StartText</time></th>
-                    @foreach (var cell in row.Cells)
+                var blocks = Timeline.ForRoom(Model.Screenings.Where(item => item.Room == room));
+                <h3 class="room-heading">@room</h3>
+                <section class="room-track" aria-label="@room" style="--lane-count: @blocks[0].LaneCount;">
+                    @foreach (var block in blocks)
                     {
-                        <td>
-                            @foreach (var screening in cell.Screenings)
-                            {
-                                <ScreeningCard Screening="screening" Selected="@(screening.Screening.Id == SelectedScreening?.Screening.Id)" OnSelected="OnScreeningSelected" />
-                            }
-                        </td>
+                        <div class="calendar-block" style="@BlockStyle(block)">
+                            <ScreeningCard Screening="block.Showing" Selected="@(block.Showing.Screening.Id == SelectedScreening?.Screening.Id)" DetailsOpen="@(SelectedScreening is not null)" OnSelected="OnScreeningSelected" />
+                        </div>
                     }
-                </tr>
+                </section>
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>
 
 @code {
     private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("en-GB");
+    private CalendarTimeline Timeline { get; set; } = null!;
+    private IEnumerable<string> VisibleRooms => Model.Rooms.Where(room => Model.SelectedRoom.Length == 0 || room == Model.SelectedRoom);
+    private string TimelineStyle => FormattableString.Invariant(
+        $"--timeline-width: {Timeline.Minutes * .125}rem;");
+
+    protected override void OnParametersSet()
+    {
+        Timeline = CalendarTimeline.Create(Model.Screenings);
+    }
+
+    private string BlockStyle(CalendarTimeline.Block block) => FormattableString.Invariant(
+        $"left: calc((100% - 2rem) * {block.OffsetMinutes / (double)Timeline.Minutes}); width: calc((100% - 2rem) * {block.DurationMinutes / Timeline.Minutes}); top: calc({block.Lane} * var(--room-lane-height));");
 
     [Parameter, EditorRequired]
     public SchedulePageModel Model { get; set; } = null!;

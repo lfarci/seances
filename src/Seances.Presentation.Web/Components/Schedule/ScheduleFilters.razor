@@ -1,0 +1,97 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager Navigation
+
+<div class="schedule-filters">
+    <div class="filter-form" role="group" aria-label="Schedule filters">
+        <CinemaPicker Model="Model" OnChanged="OnCinemaChanged" />
+        <div class="filter-field date-filter">
+            <label for="service-date">Date</label>
+            <nav class="date-navigation" aria-label="Navigate service dates">
+                @if (Model.DateIndex > 0)
+                {
+                    <a class="date-step" aria-label="Previous date" title="Previous date" href="@ScheduleUrl(Model.Dates[Model.DateIndex - 1], Model.Cinema.Id)">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>
+                    </a>
+                }
+                else
+                {
+                    <span class="date-step" role="link" aria-disabled="true" aria-label="Previous date">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>
+                    </span>
+                }
+                <select id="service-date" name="date" value="@Model.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" @onchange="OnDateChanged">
+                    @foreach (var date in Model.Dates)
+                    {
+                        <option value="@date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" selected="@(date == Model.Date)">
+                            @date.ToString("ddd d MMM", DisplayCulture)
+                        </option>
+                    }
+                </select>
+                @if (Model.DateIndex >= 0 && Model.DateIndex < Model.Dates.Count - 1)
+                {
+                    <a class="date-step" aria-label="Next date" title="Next date" href="@ScheduleUrl(Model.Dates[Model.DateIndex + 1], Model.Cinema.Id)">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg>
+                    </a>
+                }
+                else
+                {
+                    <span class="date-step" role="link" aria-disabled="true" aria-label="Next date">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg>
+                    </span>
+                }
+                @if (Model.Today is { } today)
+                {
+                    <a class="date-step date-today" href="@ScheduleUrl(today, Model.Cinema.Id)" aria-current="@(today == Model.Date ? "date" : null)">Today</a>
+                }
+                else
+                {
+                    <span class="date-step date-today" role="link" aria-disabled="true" title="Today's programme is not published for this cinema.">Today</span>
+                }
+            </nav>
+        </div>
+        <div class="filter-field">
+            <label for="calendar-room">Room</label>
+            <select id="calendar-room" name="room" value="@Model.SelectedRoom" @onchange="OnRoomChanged">
+                <option value="" selected="@(Model.SelectedRoom.Length == 0)">All rooms (@Model.Rooms.Count)</option>
+                @foreach (var room in Model.Rooms)
+                {
+                    <option value="@room" selected="@(room == Model.SelectedRoom)">@room</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+@code {
+    private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("en-GB");
+
+    [Parameter, EditorRequired]
+    public SchedulePageModel Model { get; set; } = null!;
+
+    private void OnCinemaChanged(string cinemaId) => ChangeFilter("cinema", cinemaId);
+
+    private void OnDateChanged(ChangeEventArgs args) => ChangeFilter("date", args.Value?.ToString());
+
+    private void OnRoomChanged(ChangeEventArgs args) => ChangeFilter("room", args.Value?.ToString());
+
+    private void ChangeFilter(string name, string? value)
+    {
+        var values = new Dictionary<string, string?>
+        {
+            ["cinema"] = Model.Cinema.Id,
+            ["date"] = Model.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["room"] = Model.SelectedRoom
+        };
+        values[name] = value;
+        Navigation.NavigateTo(QueryHelpers.AddQueryString("/", values), forceLoad: true);
+    }
+
+    private string ScheduleUrl(DateOnly date, string cinemaId) => QueryHelpers.AddQueryString("/",
+        new Dictionary<string, string?>
+        {
+            ["date"] = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["cinema"] = cinemaId,
+            ["room"] = Model.SelectedRoom
+        });
+}

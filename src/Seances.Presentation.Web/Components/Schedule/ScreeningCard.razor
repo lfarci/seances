@@ -1,9 +1,17 @@
 <button type="button" class="@(Mobile ? "mobile-showing" : "showing")" aria-pressed="@(Selected ? "true" : "false")"
-        aria-label="@Screening.StartText, @Screening.Film.Title, @(Screening.Room). Show screening details"
-        @onclick="SelectScreening">
+        aria-expanded="@(Selected ? "true" : "false")" aria-controls="@(Selected ? "screening-details" : null)"
+        aria-label="@Screening.StartText to @Screening.FinishText (estimated finish), @Screening.Film.Title, @(Screening.Room). Show screening details"
+        @ref="_button" @onclick="SelectScreening">
     @if (Mobile)
     {
         <time class="mobile-time" datetime="@Screening.Screening.StartsAt.ToString("O")">@Screening.StartText</time>
+    }
+    else
+    {
+        <span class="showing-header">
+            <time class="showing-start" datetime="@Screening.Screening.StartsAt.ToString("O")">@Screening.StartText</time>
+            <span class="showing-language" title="Language version">@Screening.Screening.VersionLabel</span>
+        </span>
     }
     <span class="showing-title">@Screening.Film.Title</span>
     @if (Mobile)
@@ -20,6 +28,10 @@
 </button>
 
 @code {
+    private ElementReference _button;
+    private bool _wasSelected;
+    private bool _restoreFocus;
+
     [Parameter, EditorRequired]
     public SchedulePageModel.ShowingView Screening { get; set; } = null!;
 
@@ -30,7 +42,25 @@
     public bool Selected { get; set; }
 
     [Parameter]
+    public bool DetailsOpen { get; set; }
+
+    [Parameter]
     public EventCallback<SchedulePageModel.ShowingView> OnSelected { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _restoreFocus = _wasSelected && !Selected && !DetailsOpen;
+        _wasSelected = Selected;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_restoreFocus)
+        {
+            _restoreFocus = false;
+            await _button.FocusAsync(preventScroll: true);
+        }
+    }
 
     private Task SelectScreening() => OnSelected.InvokeAsync(Screening);
 

@@ -8,17 +8,13 @@ public sealed record SchedulePageModel(
     DateOnly Date,
     IReadOnlyList<DateOnly> Dates,
     int DateIndex,
+    DateOnly? Today,
     bool HasCoverage,
-    bool IsStale,
     string CheckedAtText,
     IReadOnlyList<string> Rooms,
-    IReadOnlyList<SchedulePageModel.CalendarRow> CalendarRows,
+    string SelectedRoom,
     IReadOnlyList<SchedulePageModel.ShowingView> Screenings)
 {
-    public sealed record CalendarRow(DateTimeOffset StartsAt, string StartText, IReadOnlyList<CalendarCell> Cells);
-
-    public sealed record CalendarCell(IReadOnlyList<ShowingView> Screenings);
-
     public sealed record ShowingView(
         Screening Screening,
         Film Film,

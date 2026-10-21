@@ -8,16 +8,28 @@ else if (Model.Screenings.Count == 0)
 }
 else
 {
-    <div class="calendar-workspace">
+    <p class="calendar-help">Time runs left to right. Films lined up vertically overlap. Finish times are estimates.</p>
+    <div class="calendar-workspace @(SelectedScreening is null ? "" : "has-selection")" @onkeydown="HandleKeyDown">
         <div class="calendar-content">
             <RoomCalendar Model="Model" SelectedScreening="SelectedScreening" OnScreeningSelected="OnScreeningSelected" />
-            <MobileScreeningList Screenings="Model.Screenings" SelectedScreening="SelectedScreening" OnScreeningSelected="OnScreeningSelected" />
+            <MobileScreeningList Screenings="VisibleScreenings" SelectedScreening="SelectedScreening" OnScreeningSelected="OnScreeningSelected" />
         </div>
-        <ScreeningDetailsPane Screening="SelectedScreening" OnScreeningClosed="OnScreeningClosed" />
+        @if (SelectedScreening is not null)
+        {
+            <DetailsResizer />
+            <ScreeningDetailsPane Screening="SelectedScreening" OnScreeningClosed="OnScreeningClosed" />
+        }
     </div>
 }
 
 @code {
+    private Task HandleKeyDown(KeyboardEventArgs args) => args.Key == "Escape"
+        ? OnScreeningClosed.InvokeAsync()
+        : Task.CompletedTask;
+
+    private IReadOnlyList<SchedulePageModel.ShowingView> VisibleScreenings =>
+        Model.Screenings.Where(item => Model.SelectedRoom.Length == 0 || item.Room == Model.SelectedRoom).ToArray();
+
     [Parameter, EditorRequired]
     public SchedulePageModel Model { get; set; } = null!;
 

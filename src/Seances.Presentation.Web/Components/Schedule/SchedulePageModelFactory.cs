@@ -34,16 +34,12 @@ internal sealed class SchedulePageModelFactory(IConfiguration configuration)
             .OrderBy(RoomNumber)
             .ThenBy(item => item, StringComparer.Ordinal)
             .ToArray();
-        var screeningsBySlot = screenings
-            .GroupBy(item => (item.Screening.StartsAt, item.Room))
-            .ToDictionary(group => group.Key, group => (IReadOnlyList<SchedulePageModel.ShowingView>)group.ToArray());
-        var calendarRows = screenings.Select(item => item.Screening.StartsAt).Distinct().Order()
-            .Select(time => new SchedulePageModel.CalendarRow(time, FormatTime(time), rooms.Select(room =>
-                new SchedulePageModel.CalendarCell(screeningsBySlot.GetValueOrDefault((time, room), []))).ToArray()))
-            .ToArray();
-
-        return new SchedulePageModel(cinemas, cinema, date, dates, dateIndex, hasCoverage,
-            IsStale(snapshot.CheckedAt, now), FormatDateTime(snapshot.CheckedAt), rooms, calendarRows, screenings);
+        var requestedRoom = query.TryGetValue("room", out var roomValue) ? roomValue.ToString() : "";
+        var selectedRoom = rooms.Contains(requestedRoom, StringComparer.Ordinal) ? requestedRoom : "";
+        var today = BrusselsToday(now);
+        var hasToday = snapshot.PublishedDates.Any(item => item.CinemaId == cinema.Id && item.Date == today);
+        return new SchedulePageModel(cinemas, cinema, date, dates, dateIndex, hasToday ? today : null, hasCoverage,
+            FormatDateTime(snapshot.CheckedAt), rooms, selectedRoom, screenings);
     }
 
     private static Cinema SelectCinema(IReadOnlyList<Cinema> cinemas, IDictionary<string, Microsoft.Extensions.Primitives.StringValues> query)
@@ -89,9 +85,6 @@ internal sealed class SchedulePageModelFactory(IConfiguration configuration)
             ? number
             : room == "Room unavailable" ? int.MaxValue : int.MaxValue - 1;
     }
-
-    private static bool IsStale(DateTimeOffset checkedAt, DateTimeOffset now) =>
-        now - checkedAt > TimeSpan.FromHours(36);
 
     private static string FormatDateTime(DateTimeOffset instant) =>
         TimeZoneInfo.ConvertTime(instant, BrusselsTimeZone).ToString("ddd d MMM, HH:mm", DisplayCulture);
