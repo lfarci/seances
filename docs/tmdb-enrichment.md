@@ -49,6 +49,7 @@ References: [TMDB FAQ](https://developer.themoviedb.org/docs/faq), [search](http
 
 - Enrich during collection only; web requests read the saved snapshot and never call UGC or TMDB.
 - Read the TMDB credential from local configuration or user secrets, never source control. Without one, skip TMDB enrichment with a warning.
+- When a credential is configured for live collection, validate its format and confirm authentication with TMDB before making any UGC requests. If validation fails or authentication cannot be confirmed, fail collection without writing a snapshot. Fixture collection does not contact TMDB.
 - Failed requests, rate limits (HTTP 429), or no confirmed match produce warnings and preserve schedule data.
 
 ## Implementation checklist
