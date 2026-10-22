@@ -1,160 +1,316 @@
 ---
 name: Séances
-description: A clear way to browse Brussels cinema schedules.
+description: Clear cultural wayfinding for Brussels cinema schedules.
 colors:
-  canvas: "#f7f4ef"
-  ink: "#26211d"
-  muted: "#51473e"
-  paper: "#fffefa"
-  divider: "#c5b9ab"
-  control-border: "#7c6d60"
-  screening-border: "#958575"
-  alternate-room: "#efe8df"
-  time-header: "#e4d9cb"
-  details-paper: "#f5f0e9"
-  hover: "#f7eae5"
-  burgundy: "#762c27"
-  burgundy-deep: "#56201c"
-  burgundy-soft: "#ead4cc"
-  focus-blue: "#175c9e"
+  canvas: "#f3f7f8"
+  ink: "#142329"
+  muted: "#465c65"
+  paper: "#ffffff"
+  line: "#bdcdd2"
+  control-line: "#667f88"
+  card-line: "#6d8790"
+  row-alternate: "#eaf1f3"
+  time-header: "#dae9ed"
+  details-paper: "#f0f7f7"
+  hover: "#e4f3ef"
+  accent: "#006b64"
+  accent-dark: "#004d48"
+  accent-soft: "#d5eee8"
+  on-accent: "#ffffff"
+  focus: "#1646a0"
+  notice-line: "#93652b"
+  notice-paper: "#fff5e4"
+  notice-ink: "#614117"
+  dark-canvas: "#101c22"
+  dark-ink: "#edf5f6"
+  dark-muted: "#b5c8ce"
+  dark-paper: "#16272e"
+  dark-line: "#48616b"
+  dark-control-line: "#819da7"
+  dark-card-line: "#78949e"
+  dark-row-alternate: "#1d323b"
+  dark-time-header: "#263e47"
+  dark-details-paper: "#1b3037"
+  dark-hover: "#23453f"
+  dark-accent: "#67d9c9"
+  dark-accent-dark: "#a9f5e8"
+  dark-accent-soft: "#234b43"
+  dark-on-accent: "#092d29"
+  dark-focus: "#f5ce72"
+  dark-notice-line: "#cda15d"
+  dark-notice-paper: "#382d1d"
+  dark-notice-ink: "#f6d9aa"
+  imdb-yellow: "#f5c518"
+  imdb-black: "#000000"
 typography:
   display:
-    fontFamily: '"Source Serif 4", Georgia, serif'
+    fontFamily: '"Source Sans 3", system-ui, sans-serif'
     fontSize: "clamp(2.25rem, 5vw, 3.5rem)"
-    fontWeight: 500
+    fontWeight: 700
     lineHeight: 1.08
     letterSpacing: "-.025em"
-  title:
-    fontFamily: '"Source Serif 4", Georgia, serif'
+  display-compact:
+    fontSize: "2rem"
+    fontWeight: 700
+    lineHeight: 1.08
+  headline:
     fontSize: "1.75rem"
-    fontWeight: 500
+    fontWeight: 650
     lineHeight: 1.2
-  body:
-    fontFamily: '"Source Sans 3", system-ui, sans-serif'
-    fontSize: "1rem"
-    lineHeight: 1.45
+  headline-compact:
+    fontSize: "1.25rem"
+    fontWeight: 650
+    lineHeight: 1.2
+  detail-title:
+    fontSize: "1.55rem"
+    fontWeight: 600
+    lineHeight: 1.25
+  about-title:
+    fontSize: "1.15rem"
+    fontWeight: 600
+    lineHeight: 1.3
   screening-title:
-    fontFamily: '"Source Sans 3", system-ui, sans-serif'
     fontSize: "1.0625rem"
     fontWeight: 650
     lineHeight: 1.25
+  body:
+    fontFamily: '"Source Sans 3", system-ui, sans-serif'
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.45
+  intro:
+    fontSize: "1.05rem"
+    lineHeight: 1.5
+  intro-compact:
+    fontSize: ".9rem"
+    lineHeight: 1.5
+  freshness:
+    fontSize: ".9rem"
+    lineHeight: 1.45
+  version:
+    fontSize: ".92rem"
+    lineHeight: 1.45
+  screening-start:
+    fontSize: ".9375rem"
+    fontWeight: 700
+    lineHeight: 1.45
   time:
-    fontSize: "0.875rem"
+    fontSize: ".875rem"
     fontWeight: 650
+    lineHeight: 1.45
+  metadata:
+    fontSize: ".875rem"
+    lineHeight: 1.45
+  help:
+    fontSize: ".875rem"
+    lineHeight: 1.5
+  detail-label:
+    fontSize: ".875rem"
+    fontWeight: 700
+    lineHeight: 1.45
+  language:
+    fontSize: ".8125rem"
+    fontWeight: 650
+    lineHeight: 1.3
+  attribution:
+    fontSize: ".8125rem"
+    lineHeight: 1.45
+  imdb:
+    fontFamily: 'Impact, "Arial Black", "Source Sans 3", system-ui, sans-serif'
+    fontSize: ".75rem"
+    fontWeight: 900
+    lineHeight: 1.2
+    letterSpacing: ".01em"
 rounded:
-  control: "0.35rem"
-  notice: "0.45rem"
-  showing: "0.55rem"
-  panel: "0.8rem"
+  square: "0"
+  resizer-grip: "1px"
+  brand: ".2rem"
+  language: ".25rem"
+  action: ".35rem"
+  control: ".45rem"
+  screening: ".5rem"
+  subpanel: ".65rem"
+  panel: ".75rem"
+spacing:
+  metadata: ".2rem"
+  xs: ".25rem"
+  compact-gap: ".375rem"
+  label-gap: ".4rem"
+  sm: ".5rem"
+  card-block: ".625rem"
+  md: ".75rem"
+  narrow-panel: ".8rem"
+  lg: "1rem"
+  notice-inline: "1.1rem"
+  xl: "1.25rem"
+  panel: "1.5rem"
+  section: "2rem"
 components:
   button-primary:
-    backgroundColor: "{colors.burgundy}"
-    textColor: "#ffffff"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
     rounded: "{rounded.control}"
-    padding: "0.55rem 0.75rem"
+    padding: ".55rem .75rem"
+    height: "2.75rem"
   button-primary-hover:
-    backgroundColor: "{colors.burgundy-deep}"
-    textColor: "#ffffff"
-  cinema-link-current:
-    textColor: "{colors.burgundy-deep}"
+    backgroundColor: "{colors.accent-dark}"
+  select:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: ".55rem .75rem"
+  date-navigation:
+    rounded: "{rounded.action}"
+    padding: ".45rem .65rem"
+    textColor: "{colors.accent-dark}"
+  language-tag:
+    typography: "{typography.language}"
+    rounded: "{rounded.language}"
+    padding: ".0625rem .375rem"
+  screening-card:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.screening}"
+    padding: ".625rem .75rem"
+  screening-selected:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
+  details:
+    backgroundColor: "{colors.details-paper}"
+    rounded: "{rounded.subpanel}"
+    padding: "1.25rem"
+  booking-link:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
+    rounded: "{rounded.action}"
+    padding: ".55rem .8rem"
 ---
 
 # Design System: Séances
 
 ## Overview
 
-**Creative North Star: “Showtimes at a glance”**
+**Creative North Star: "Clear cultural wayfinding"**
 
-Séances is a task-focused schedule reader for Brussels cinema-goers. Its visual system keeps the incumbent cream-and-burgundy identity, with Source Serif 4 headings and Source Sans 3 calendar text. Darker supporting text, stronger screening outlines, and distinct warm row backgrounds keep cinema, date, room, and start time easy to scan.
+Séances is a clear, task-focused schedule reader. Mineral surfaces, strong control borders, teal active states, and open sans-serif typography help visitors scan cinema, service date, room, and start time without decorative cinema-poster treatment.
 
-The schedule is grouped by cinema and service date. At wide sizes, showings sit on a full-width horizontal timeline with rooms as rows. Selecting a showing opens a contextual details pane on the right; closing it restores the full timeline width. At narrower sizes, the same ordered information becomes a chronological list, with selected details in a right-side drawer. Controls retain visible labels and keyboard focus styling. The code provides no specified WCAG conformance level, and this document makes no conformance claim.
+This approved system replaces the cream, burgundy, and serif identity while preserving the existing workspace. Appearance follows the device: pale mineral and white in light mode; blue-black mineral, pale text, and mint-teal in dark mode. Selection links a screening to its details without confusing selection with keyboard focus.
 
 **Key Characteristics:**
-- Cream page canvas, warm paper surfaces, and burgundy schedule accents.
-- Locally served Source Serif 4 headings paired with Source Sans 3 film titles, controls, and schedule text.
-- Horizontal duration-based timeline with rooms as rows on wider screens; chronological screening list on narrow screens. Shared cinema, date, and room filters update both layouts immediately.
-- Visible keyboard focus treatment and labeled navigation and date controls.
+- Mineral surfaces and teal emphasis, coordinated across device light and dark modes.
+- Source Sans 3 throughout the interface, with an isolated IMDb brand badge exception.
+- Flat, bordered grouping with a compact timeline and chronological phone list.
+- Check-marked selection, dashed same-film treatment, and independently visible focus.
+
+Implementation evidence: `src/Seances.Presentation.Web/wwwroot/app.css` and the Razor components under `Components/Schedule`, with font loading in `Components/App.razor`. Automated axe checks and palette contrast tests are evidence only; they do not establish full WCAG conformance. The product has no agreed conformance level.
 
 ## Colors
 
-The palette pairs warm cream and paper neutrals with a deep burgundy accent; blue is reserved for keyboard focus.
-
 ### Primary
-- **Burgundy**: primary actions, selected cinema indication, screening details, and time emphasis.
-- **Deep Burgundy**: action and link hover states, selected navigation text, and detail summaries.
+
+Deep Teal (`accent`) drives actions and desktop selection; its deeper companion (`accent-dark`) emphasizes times, links, and hover. Pale Teal (`accent-soft`) marks mobile selection and other screenings of the selected film. `on-accent` is the paired foreground, not a universal white.
+
+The `dark-` tokens replace the corresponding unprefixed roles under `prefers-color-scheme: dark`. Mint Teal takes over active states, pale mint emphasizes links and hover, and dark teal is the active foreground. The CSS role named `accent-dark` becomes lighter in dark mode: it is a semantic emphasis role, not a fixed lightness instruction.
+
+The sidecar's representative tonal ramps are synthesized OKLCH preview strips, not implemented CSS scales or additional normative colors. The complete implemented palette is the frontmatter above; previews inherit the app's live CSS custom properties so light and dark treatments stay paired.
 
 ### Neutral
-- **Cream Canvas**: the page background.
-- **Ink**: primary text.
-- **Muted Brown**: supporting copy and schedule metadata.
-- **Warm Paper**: schedule panel and form control backgrounds.
-- **Warm Divider**: panel outlines and schedule separators.
-- **Burgundy Tint**: screening cards.
-- **Focus Blue**: the visible keyboard focus outline.
+
+Mineral Canvas surrounds Paper reading surfaces. Ink and Muted distinguish primary and supporting text without opacity. Alternate Room and Time Header establish rows and the sticky axis; Details Paper distinguishes the reading section. Line groups surfaces, while Control Line and Card Line provide stronger interactive boundaries. Hover is a separate soft teal surface.
+
+### Functional and brand exceptions
+
+Focus is blue in light mode and amber in dark mode. Notice Line, Notice Paper, and Notice Ink form coordinated warning/empty-state roles in each mode. These are functional colors, not additional decorative accents. IMDb Yellow and IMDb Black are fixed brand colors in both modes, confined to the small badge; do not recolor the rest of the interface to match them.
+
+**The Paired Appearance Rule.** Change each semantic role together with its dark counterpart and its foreground; never apply the light palette unchanged to dark surfaces.
 
 ## Typography
 
-**Display Font:** Source Serif 4 (Georgia fallback)
-**Body and Calendar Font:** Source Sans 3 (system sans-serif fallback)
+**Display and Body Font:** Source Sans 3, with system-ui and sans-serif fallbacks. The locally served variable face supports weights 200–900 and uses `font-display: swap`; only Source Sans 3 is preloaded. The old Source Serif 4 asset remains on disk but is unused and is not part of the active type system.
 
-**Character:** Source Serif 4 keeps the cinema programme’s editorial voice in page and detail headings. Source Sans 3’s open forms make dense film titles, room names, times, and controls easier to scan. The two Latin variable WOFF2 files are self-hosted, preloaded, and use font-display swap; their SIL Open Font Licenses are bundled in wwwroot/fonts. No external font connection is required.
+The frontmatter records every explicit type size rather than imposing an invented scale or minimum. Unspecified font families inherit Source Sans 3. The root line-height is 1.45 and the default body size is the browser's 1rem. No monospaced face is used; times use tabular numerals.
 
 ### Hierarchy
-- **Display** (500, responsive 2.25–3.5rem, 1.08 line-height): the page heading; compacted to 2rem in the desktop workspace.
-- **Title** (500, 1.75rem, 1.2 line-height): the selected cinema heading; compacted to 1.25rem on desktop.
-- **Screening titles** (650, 1.0625rem, 1.25 line-height): sans-serif film names, with two-line clipping in the timeline and complete titles in accessible names and details.
-- **Body** (1rem, 1.45 line-height): controls and schedule details; time labels and small metadata use a 0.875rem floor. Secondary text remains dark rather than using opacity to mute it.
-- **Labels** (650–700): control labels, room names, and time values use heavier sans-serif text for scanning.
+
+- **Display / display-compact:** page title, responsive by default and compact on desktop; both retain the display tracking.
+- **Headline / headline-compact:** cinema title; the compact size also applies to notice headings via their own heading rules.
+- **Detail-title / about-title:** film title and About heading, with the lighter 600 weight.
+- **Screening-title:** semibold film names, clamped to two lines only in the timeline. Accessible names and details retain the full title.
+- **Body:** selectors and detail values. Labels, room headings, mobile times, and mobile room names use 650; generic buttons and booking links use 700. Address and booking-unavailable copy use 1.5 line-height, synopsis uses 1.55 and a 65ch measure, and film links use 1.2.
+- **Intro / intro-compact / freshness:** supporting page text and checked-at timestamp.
+- **Screening-start / time:** card start time and axis time. Mobile start times use body size rather than the smaller desktop time size.
+- **Metadata / help / detail-label / version:** screening metadata, calendar guidance, detail terms and time/room summary, and version text. Detail notes inherit the metadata sizing; the time/room summary is functional content, not a decorative eyebrow despite its legacy CSS name.
+- **Language / attribution:** compact version badges and TMDB attribution. The former uses 650; the latter uses normal body weight.
+- **IMDb:** a local brand-only exception using Impact, Arial Black, then the UI stack. This compact heavy wordmark is not a heading font.
+
+Inheritance matters to advisory detectors: screening buttons inherit weight 700 from the generic button rule, so mobile screening metadata is 700 unless a child overrides it; metadata does not reset to body weight. Mobile times and room labels override to 650, as do film titles. Compact metadata, attribution, language badges, and the IMDb wordmark are intentionally recorded at their actual sizes, not silently normalized to a larger claimed floor.
+
+**The One Reading Voice Rule.** Use Source Sans 3 for interface headings and content; the IMDb badge is a bounded brand exception, not permission to introduce another display family.
 
 ## Layout
 
-On desktop, the app fills the viewport height and width with 0.75rem outer gutters. Compact headings and a checked-at timestamp share the top row, followed by one filter toolbar. The timeline takes the remaining width and height by default. Selecting a screening reveals a right-hand details pane, aligned with the calendar at both top and bottom; each pane scrolls internally. Closing details or pressing Escape restores the full-width timeline. The time scale expands to fill available width, with a minimum readable scale that scrolls horizontally when needed. Room names stay sticky on the left and time headers stay sticky above. Cinema, date, and room selectors apply on change. Previous/next arrows flank the date selector, with Today beside them.
+At `min-width: 52.001rem`, the workspace fills `100dvh` with .75rem outer gutters and vertical padding. The page heading and supporting text share a compact row; cinema/address and checked-at text precede the labeled filters. The schedule panel uses 1rem padding and the timeline fills the remainder. Without a selection, it spans the workspace. Room names stick left; the axis sticks above; both dimensions scroll internally.
 
-The desktop details pane starts at 20.5rem but never exceeds 25% of the schedule workspace. Dragging the divider changes its width immediately in the browser, without server round trips. The minimum is the smaller of 16rem and 20% of the workspace. The last width is retained while closing and reopening details on the same page. The focusable separator supports Left/Right arrows, Shift for larger steps, Home/End for minimum/maximum width, and double-click to reset. Resizing the viewport reapplies the limits.
+Selection adds a .75rem separator and a right-hand details column, initially 20.5rem, capped at 25% of the workspace. Its minimum is the smaller of 16rem and 20%. The divider supports dragging, arrow keys, Shift-modified larger steps, Home/End, and double-click reset; closing and reopening preserves its current page-local width. The panes align vertically and scroll independently. Closing, Escape, or reselecting dismisses details and restores the full timeline.
 
-Below 52rem, the page returns to a naturally scrolling centered column; the timeline becomes a chronological list and selected details open in a fixed right-side drawer without a resize divider. Mobile filter fields stack, keeping date navigation together. Below 26rem, content gutters and the list time column tighten.
+At `max-width: 52rem`, use a naturally scrolling column capped at 42rem, 1rem outer gutters, and 2rem top padding. Filters stack: each labeled field spans the two-column filter grid rather than sharing the date and room in one row. The chronological list replaces the timeline. Selected details occupy a fixed right-side drawer, inset 1rem and capped at 23rem wide; no divider is shown.
+
+At `max-width: 26rem`, outer gutters tighten to .625rem, panel padding becomes .8rem, and the list time column becomes 4.4rem with a .65rem gap (normally 5.25rem and .9rem). At `max-width: 22rem`, the date toolbar becomes three columns: 2.75rem previous, flexible date, 2.75rem next. Today moves to its own second row, aligned right, avoiding clipping at 320px. The body minimum width is 20rem; this is not a claim of support below that width.
+
+Spacing is compact and functional, predominantly quarter-rem increments with finer control/metadata adjustments. Timeline room lanes are 6.5rem high, the room column is 7.5rem, and the header is 3rem. Overlapping screenings use stacked lanes; duration-based widths retain horizontal scrolling when needed.
 
 ## Elevation & Depth
 
-The interface uses flat surfaces, borders, and tonal differences; the stylesheet defines no box shadows. The cream canvas, paper panel, shaded table headers, and tinted showing cards establish grouping without elevation effects.
+There are no box shadows. Borders, alternating surfaces, sticky layering, and an opaque details drawer establish depth. The mobile drawer sits at z-index 10 without an added scrim. Timeline headers use z-indices 2–4; focused cards rise locally to 1 so their indicator remains visible.
+
+**The Flat Grouping Rule.** Use borders and tonal surfaces for grouping, not a new default shadow treatment.
 
 ## Shapes
 
-Controls use gently rounded corners, notices and showing cards use a slightly larger radius, and the main schedule panel has the broadest rounding. Thin warm borders define panels, controls, and cards; alternating backgrounds distinguish room rows without grid lines.
+The frontmatter radius vocabulary records all actual values: square mobile rows; the one-pixel divider grip; compact brand and language corners; action/poster corners; select/button/notice corners; screening cards; calendar/details subpanels; and the outer schedule panel. Do not collapse these to the stale single control radius. Borders are generally 1px. Same-film cards use dashed outlines; disabled date navigation uses a dashed boundary. Check marks and arrow/close icons are inline SVG, not glyph icons.
 
 ## Components
 
 ### Buttons
-- **Shape:** gently rounded control corners (0.35rem).
-- **Primary:** burgundy fill, white text, and compact horizontal padding (0.55rem 0.75rem).
-- **Hover / Focus:** hover deepens the burgundy; keyboard focus uses a blue outline with a 3px width and 3px offset.
+
+Primary buttons use paired accent colors and the control radius. Their minimum height is 2.75rem (the frontmatter height is the target, not a fixed CSS height). Booking links use the smaller action radius and their own inline padding. Close controls use a paper background, strong border, a 2.75rem square target, and a soft accent hover. Timeline cards deliberately override the generic button minimum height.
+
+Global keyboard focus is a 3px outline with 3px offset. The timeline scroll region uses a -3px inset; timeline cards use -4px so overflow cannot clip focus. Selected timeline cards use `on-accent` for the outline, keeping it distinct on the active fill. Other controls retain the dedicated focus color.
 
 ### Inputs / Fields
-- Cinema, date, and room selectors share a filter bar above the schedule, with matching paper backgrounds, warm borders, widths, and control radii. Labels sit above each selector. Each selection immediately updates the schedule and its URL, preserving the other filters; there is no apply button. On narrow screens cinema spans one row, and date and room share the next.
-- The selectors have visible “Cinema”, “Date”, and “Room” labels. Focus uses the shared visible keyboard outline. Previous/next date navigation preserves the selected cinema and room when available on the destination date.
+
+Native cinema, date, and room selectors retain visible labels, paper surfaces, strong control borders, and the control radius. Hover changes the border to accent. Their minimum height is 2.75rem. Changes update the schedule and URL directly; there is no Apply button. Standard fields are 12rem wide on desktop; the date selector is also 12rem before responsive flex/grid sizing.
 
 ### Navigation
-- Cinema selection lives in the shared filter group rather than a separate navigation strip. Choosing a different cinema retains the chosen date and resets an unavailable room to all rooms.
-- Labeled previous/next arrow controls flank the date selector; unavailable ends of the date range remain visible but disabled. Today is enabled only when the selected cinema has published coverage for the current Brussels date, and preserves the room filter when available. The checked-at timestamp remains visible without an out-of-date warning banner.
+
+Previous and next are outlined icon links around the date selector. Today is a text link with the same target height; the current date adds a soft fill, accent border, and underline. Unavailable links remain visible as non-navigating disabled spans with muted text and dashed borders. Date navigation preserves the cinema and room query; cinema changes retain the chosen date, with unavailable room selection resolved by the schedule model.
+
+### Chips
+
+Language versions are compact outlined metadata tags, not interactive filters. Their small radius and fine padding keep them subordinate to the film title. Selected desktop tags inherit the active foreground and use a current-color border.
 
 ### Cards / Containers
-- The schedule panel uses a paper surface, warm divider border, and broad corner rounding.
-- Screening cards use a paper surface, a fine warm border, generous internal padding, and semibold Source Sans 3 film titles. The start time sits top-left and the language version (for example VFstNL) sits in a small outlined tag top-right; estimated finishes appear only in the details pane and accessible names. Hover adds a soft burgundy tint; selected desktop cards use a solid burgundy fill with white text. Mobile selection retains a pale tint. Room lanes are 6.5rem tall to give two-line film titles breathing room.
+
+Screening cards use strong card borders, paper surfaces, and compact padding. Hover uses the dedicated hover surface. Selected desktop cards use solid accent with paired text; mobile selection uses a soft fill and emphasis text. Both include an SVG check and `aria-pressed`. Other screenings of the same film use soft fill plus a dashed border and an explanatory accessible name, not the selected check. On mobile the dashed styling applies to the row's existing bottom border, not a newly enclosed card.
+
+The details pane is a labeled `section` (`Screening details`, polite live updates), not an `aside`. It holds actual start/room information, a film heading, version, optional poster and external links, runtime/finish data, booking availability, and film information. Its close control is visibly separate from the content. Posters retain their 2:3 ratio, existing URLs, and alternative text; this redesign ships no raster changes.
+
+Film links have outlined action styling and a 2.75rem minimum height. The IMDb badge alone uses the fixed brand palette and brand type. TMDB attribution remains compact supporting text with an underlined link. Notices and empty states use the coordinated notice palette and the control radius.
 
 ### Schedule
-- The desktop timeline uses labeled room rows and selectable screening buttons. Its horizontal time axis and room names stay visible within the scroll region. Hourly time labels and alternating paper/cream room backgrounds replace grid lines; each room name shares its row’s background. A proportional time scale positions blocks left to right from their start to estimated finish, so simultaneous films align vertically. Overlapping screenings within one room use stacked lanes.
-- Time scrolls horizontally and rooms scroll vertically, with a labeled selector for optionally focusing on one room. Compact screening blocks show their start time, language version, and title; format and estimated finish remain in the details pane. Full titles are retained in accessible button names and the details pane.
-- Selecting a showing opens its version, format, runtime, estimated finish, and booking information in a contextual right-hand pane. The pane is absent when nothing is selected; the close control, Escape, or reselecting the same showing dismisses it.
-- The narrow layout presents selectable showings in chronological order, with time and room kept alongside each film title; selected details open in a right-side drawer with a close button.
+
+Timeline cards show start, language, and title; version/format metadata is hidden there but available in details. The narrow ordered list shows time, room, title, and compact version/format metadata. Full titles and estimated finishes remain in accessible names. The scroll area has visible focus and scroll padding to account for sticky headers. Only timeline-card color/border transitions are animated (.16s ease); reduced-motion preference removes them.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the cream-and-burgundy palette, serif headings, and readable sans-serif schedule typography consistent in new schedule surfaces.
-- **Do** preserve semantic labels and visible keyboard focus styling for interactive controls.
-- **Do** keep cinema, service date, room, and start time easy to scan.
-- **Do** preserve the wide duration-based calendar and narrow chronological-list behavior when extending the schedule.
+- **Do** maintain paired mineral/teal light and dark roles following the device preference.
+- **Do** preserve labels, inline SVG selection checks, dashed same-film cues, and independent visible keyboard focus.
+- **Do** preserve the wide timeline, narrow chronological list, and the smallest date-toolbar wrapping rule.
+- **Do** keep Source Sans 3 as the interface voice and IMDb styling confined to its brand badge.
 
 ### Don't:
-- **Don't** claim a WCAG conformance level from the current design documentation; none has been specified.
-- **Don't** use shadows as a new default depth treatment; the current system groups content with borders and tonal surfaces.
+- **Don't** reintroduce cream/burgundy surfaces or the unused serif face as the current identity.
+- **Don't** replace selection, focus, or same-film distinctions with color alone.
+- **Don't** infer full WCAG conformance from axe results, contrast tests, or this document.
+- **Don't** add default shadows or change snapshot/raster assets as part of documenting the system.

@@ -43,7 +43,9 @@ public sealed class BlazorStartupTests
         Assert.Contains("javascript", resizerResponse.Content.Headers.ContentType?.MediaType ?? "");
 
         var fontPreloads = page.QuerySelectorAll("link[rel='preload'][as='font']");
-        Assert.Equal(2, fontPreloads.Length);
+        Assert.Single(fontPreloads);
+        Assert.Equal("light dark", page.QuerySelector("meta[name='color-scheme']")?.GetAttribute("content"));
+        Assert.Equal(2, page.QuerySelectorAll("meta[name='theme-color'][media]").Length);
         foreach (var preload in fontPreloads)
         {
             var path = preload.GetAttribute("href")!;
