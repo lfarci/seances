@@ -9,6 +9,69 @@ public sealed class TmdbFilmEnricherTests
 {
     private static readonly TmdbFilmQuery Query = new("42", "LE VOYAGE", "The Journey", 2026, 106, ["Jane Doe"]);
 
+    [Theory]
+    [InlineData("token\n")]
+    [InlineData("\r\ntoken\r\n")]
+    [InlineData(" token ")]
+    public async Task Trims_surrounding_whitespace_from_the_access_token(string token)
+    {
+        var handler = new TmdbRoutingHandler().Respond("/3/movie/77", Movie(77, "Anyone", 10));
+        var enricher = new TmdbFilmEnricher(new HttpClient(handler), token, new AdvancingTimeProvider());
+
+        var metadata = await enricher.EnrichAsync(Query with { KnownTmdbId = 77 }, CancellationToken.None);
+
+        Assert.Equal(77, metadata?.TmdbId);
+        Assert.Equal("Bearer token", handler.LastAuthorization);
+    }
+
+    [Theory]
+    [InlineData("to\nken")]
+    [InlineData("to\rken")]
+    [InlineData("to\0ken")]
+    public void Malformed_access_tokens_fail_before_contacting_tmdb(string token)
+    {
+        var handler = new TmdbRoutingHandler();
+
+        var error = Assert.Throws<ArgumentException>(() =>
+            new TmdbFilmEnricher(new HttpClient(handler), token, new AdvancingTimeProvider()));
+
+        Assert.Contains("single-line", error.Message);
+        Assert.DoesNotContain(token, error.Message, StringComparison.Ordinal);
+        Assert.Empty(handler.Requests);
+    }
+
+    [Fact]
+    public async Task Validates_the_access_token_with_tmdb()
+    {
+        var handler = new TmdbRoutingHandler().Respond("/3/authentication", """{"success":true}""");
+
+        await Enricher(handler).ValidateAccessTokenAsync(CancellationToken.None);
+
+        Assert.Equal("/3/authentication", Assert.Single(handler.Requests).AbsolutePath);
+        Assert.Equal("Bearer token", handler.LastAuthorization);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    public async Task Token_validation_failures_are_not_swallowed(HttpStatusCode status)
+    {
+        var handler = new TmdbRoutingHandler().Respond("/3/authentication", "{}", status);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            Enricher(handler).ValidateAccessTokenAsync(CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Token_validation_requires_a_successful_authentication_response()
+    {
+        var handler = new TmdbRoutingHandler().Respond("/3/authentication", """{"success":false}""");
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            Enricher(handler).ValidateAccessTokenAsync(CancellationToken.None));
+    }
+
     [Fact]
     public async Task Confirms_the_candidate_by_director_rather_than_search_rank()
     {

@@ -22,8 +22,23 @@ public sealed class TmdbFilmEnricher
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(accessToken);
         _logger = logger ?? NullLogger<TmdbFilmEnricher>.Instance;
-        _requests = new TmdbHttpClient(http, accessToken, _logger);
+        var token = accessToken.Trim();
+        if (token.IndexOfAny(['\r', '\n', '\0']) >= 0)
+        {
+            throw new ArgumentException("TMDB access token must be a single-line API read access token without NUL characters.", nameof(accessToken));
+        }
+        _requests = new TmdbHttpClient(http, token, _logger);
         _clock = clock;
+    }
+
+    /// <summary>Checks the configured credential with TMDB and throws when authentication cannot be confirmed.</summary>
+    public async Task ValidateAccessTokenAsync(CancellationToken cancellationToken)
+    {
+        var response = await _requests.GetAsync<TmdbAuthenticationResponseDto>("authentication", cancellationToken);
+        if (!response.Success)
+        {
+            throw new HttpRequestException("TMDB rejected the access token.", null, HttpStatusCode.Unauthorized);
+        }
     }
 
     /// <summary>Returns metadata for a confirmed match, or null when the film is unmatched or TMDB is unavailable.</summary>

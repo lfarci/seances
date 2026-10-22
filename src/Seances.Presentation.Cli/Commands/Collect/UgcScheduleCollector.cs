@@ -19,7 +19,13 @@ internal sealed class UgcScheduleCollector(ILoggerFactory loggerFactory) : ISche
         using var tmdbClient = new HttpClient { Timeout = CliCommandDefaults.HttpTimeout };
         var adapter = new UgcAdapter(client, TimeProvider.System, loggerFactory.CreateLogger<UgcAdapter>());
         var corrections = await ReadCorrectionsAsync(enrichment.TmdbCorrectionsPath, cancellationToken);
-        var options = new FilmEnrichmentOptions(CreateTmdbEnricher(fixtureDirectory, tmdbClient, logger), corrections);
+        var tmdb = CreateTmdbEnricher(fixtureDirectory, tmdbClient, logger);
+        if (tmdb is not null)
+        {
+            logger.LogInformation("Validating TMDB access token");
+            await tmdb.ValidateAccessTokenAsync(cancellationToken);
+        }
+        var options = new FilmEnrichmentOptions(tmdb, corrections);
         return await new ScheduleCollectionService(adapter, TimeProvider.System,
                 loggerFactory.CreateLogger<ScheduleCollectionService>(), options)
             .CollectAsync(fixtureDirectory, dateSelection, cancellationToken, enrichment.PreviousSnapshot);
