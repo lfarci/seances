@@ -345,6 +345,11 @@ select:hover {
     :is(.calendar-scroll, .screening-details)::-webkit-scrollbar {
         width: .625rem;
         height: .625rem;
+        background: transparent;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-track-piece {
+        background: transparent;
     }
 
     :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-thumb {

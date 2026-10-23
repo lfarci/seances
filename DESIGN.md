@@ -250,7 +250,7 @@ Mineral Canvas surrounds Paper reading surfaces without an outer schedule card. 
 
 Canvas Glow and Canvas Glow Secondary provide paired ambient teal washes. Glass Panel fills the calendar shell, not the semantic schedule container; Glass Details is 90% opaque. Both sit beneath Glass Sheen, with Paper and Details Paper as opaque fallbacks. Control Sheen and Action Sheen provide directional gloss on controls and cards over opaque base colors. All color roles have paired dark replacements.
 
-Scrollbar Thumb is a paired muted mineral role shared by calendar and details, distinct from control borders. Tracks and corners remain transparent; supported thumb hover uses Accent. Forced colors retain native standards-based colors and use CanvasText/Highlight for WebKit thumb/hover styling.
+Scrollbar Thumb is a paired muted mineral role shared by calendar and details, distinct from control borders. Nothing paints behind the thumb: the base scrollbar element, track pieces, tracks, and corners stay transparent; supported thumb hover uses Accent. Forced colors retain native standards-based colors and use CanvasText/Highlight for WebKit thumb/hover styling.
 
 ### Functional and brand exceptions
 
@@ -344,7 +344,7 @@ Film links have outlined action styling, the control radius, and a 2.75rem minim
 
 Timeline cards show start, language, and title; version/format metadata is hidden there but available in details. The narrow ordered list shows time, room, title, and compact version/format metadata. Full titles and estimated finishes remain in accessible names. The scroll area has visible focus and scroll padding to account for sticky headers. Only timeline-card color/border transitions are animated (.16s ease); reduced-motion preference removes them.
 
-Calendar and details share thin standards-based scrollbars with Scrollbar Thumb on transparent tracks and stable gutters. Under `@supports selector(::-webkit-scrollbar)`, Chromium/Safari reset standard width/color to auto and use a .625rem (10px) gutter with a .125rem (2px) transparent thumb border: a 6px visible thumb at the default root size. The thumb is fully rounded (999px), uses padding-box clipping, and changes to Accent on hover. Track margins use `--radius-section` (1.5rem / 24px) to clear the panes' curved ends; tracks and corners are transparent and arrow buttons are hidden. Forced colors restore standard `scrollbar-color: auto` and use CanvasText thumbs with Highlight hover for WebKit styling. These scrollbars add neither noise nor enclosing surface treatment.
+Calendar and details share thin standards-based scrollbars with Scrollbar Thumb on stable gutters. Under `@supports selector(::-webkit-scrollbar)`, Chromium/Safari reset standard width/color to auto and use a .625rem (10px) gutter with a .125rem (2px) transparent thumb border: a 6px visible thumb at the default root size. The thumb is fully rounded (999px), uses padding-box clipping, and changes to Accent on hover. Track margins use `--radius-section` (1.5rem / 24px) to clear the panes' curved ends; the base scrollbar element, track pieces, tracks, and corners are all transparent, so only the thumb paints, and arrow buttons are hidden. Forced colors restore standard `scrollbar-color: auto` and use CanvasText thumbs with Highlight hover for WebKit styling. These scrollbars add neither noise nor enclosing surface treatment.
 
 ## Do's and Don'ts
 
