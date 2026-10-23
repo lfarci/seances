@@ -6,9 +6,10 @@
 <main>
     @if (_model is null)
     {
-        <header>
+        <header class="page-heading">
             <h1>Find a screening</h1>
             <p class="intro">Browse showtimes for Brussels cinemas.</p>
+            <ThemePicker />
         </header>
         <section class="notice" role="status" aria-live="polite">
             <h2>Schedule unavailable</h2>
@@ -20,6 +21,7 @@
         <header class="page-heading">
             <h1>Find a screening</h1>
             <p class="intro">Browse showtimes by cinema, room, and time.</p>
+            <ThemePicker />
         </header>
 
         <section class="schedule" aria-labelledby="schedule-heading">

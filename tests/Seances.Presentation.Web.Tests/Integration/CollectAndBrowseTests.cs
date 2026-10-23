@@ -75,6 +75,14 @@ public sealed class CollectAndBrowseTests
             Assert.Equal(2, toisonPage.QuerySelectorAll(".calendar-block").Length);
             Assert.Equal(2, toisonPage.QuerySelectorAll(".room-heading").Length);
             Assert.Equal(2, toisonPage.QuerySelectorAll(".room-track").Length);
+            Assert.Equal("Room", toisonPage.QuerySelector(".time-heading > span")!.TextContent.Trim());
+            Assert.Equal("Start time", toisonPage.QuerySelector(".axis-caption")!.TextContent.Trim());
+            Assert.Equal("true", toisonPage.QuerySelector(".time-axis")!.GetAttribute("aria-hidden"));
+            Assert.NotEmpty(toisonPage.QuerySelectorAll(".time-cell.is-half-hour"));
+            Assert.All(toisonPage.QuerySelectorAll(".time-cell.is-half-hour"), tick =>
+                Assert.True(string.IsNullOrWhiteSpace(tick.TextContent)));
+            Assert.All(toisonPage.QuerySelectorAll(".time-cell:not(.is-half-hour)"), tick =>
+                Assert.Matches(@"^\d{2}:00$", tick.TextContent.Trim()));
             Assert.Contains("--timeline-width:", toisonPage.QuerySelector(".calendar")!.GetAttribute("style"));
             Assert.NotNull(toisonPage.QuerySelector("label[for='calendar-room']"));
             Assert.Equal("All rooms (2)", toisonPage.QuerySelector("#calendar-room option")!.TextContent.Trim());
