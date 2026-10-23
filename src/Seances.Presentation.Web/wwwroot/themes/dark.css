@@ -22,7 +22,7 @@
     --notice-line: #cda15d;
     --notice-paper: #382d1d;
     --notice-ink: #f6d9aa;
-    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m6 8 4 4 4-4' fill='none' stroke='%239cb6c1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7'%3E%3Cpath d='M1 1.25 6 5.75 11 1.25' fill='none' stroke='%239cb6c1' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --canvas-glow: rgb(103 217 201 / .24);
     --canvas-glow-secondary: rgb(103 217 201 / .1);
     --panel-shadow: 0 .75rem 2rem -.75rem rgb(0 0 0 / .42), 0 .25rem 2.75rem -.5rem rgb(103 217 201 / .18);
