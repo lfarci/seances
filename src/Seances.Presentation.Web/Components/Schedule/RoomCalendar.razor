@@ -4,11 +4,19 @@
     <div class="calendar-scroll" role="region" tabindex="0"
          aria-label="Screening calendar for @Model.Cinema.Name on @(Model.Date.ToString("d MMMM yyyy", DisplayCulture)). Scroll to see more times and rooms.">
         <div class="calendar" style="@TimelineStyle">
-            <div class="time-heading">Room / Time</div>
+            <div class="time-heading">
+                <span>Room</span>
+                <span class="axis-caption">Start time</span>
+            </div>
             <div class="time-axis" aria-hidden="true">
-                @foreach (var tick in Timeline.Ticks.Where(tick => tick.OffsetMinutes % 60 == 0))
+                @foreach (var tick in Timeline.Ticks)
                 {
-                    <span class="time-cell" style="@FormattableString.Invariant($"left: calc((100% - 2rem) * {tick.OffsetMinutes / (double)Timeline.Minutes})")">@tick.Text</span>
+                    <span class="time-cell @(tick.OffsetMinutes % 60 == 0 ? "" : "is-half-hour")" style="@FormattableString.Invariant($"left: calc((100% - 2rem) * {tick.OffsetMinutes / (double)Timeline.Minutes})")">
+                        @if (tick.OffsetMinutes % 60 == 0)
+                        {
+                            @tick.Text
+                        }
+                    </span>
                 }
             </div>
             @foreach (var room in VisibleRooms)

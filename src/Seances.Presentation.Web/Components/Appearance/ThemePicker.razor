@@ -1,0 +1,19 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<label class="theme-picker">
+    <span>Theme</span>
+    <select id="appearance-mode" data-theme-selector>
+        <option value="system">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+    </select>
+</label>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("seancesTheme.sync");
+    }
+}

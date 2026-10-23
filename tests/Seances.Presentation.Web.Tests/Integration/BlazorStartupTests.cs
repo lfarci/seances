@@ -29,7 +29,7 @@ public sealed class BlazorStartupTests
         using var client = factory.CreateClient();
         var html = await client.GetStringAsync("/");
         var page = await new HtmlParser().ParseDocumentAsync(html);
-        var script = Assert.Single(page.QuerySelectorAll("script[src]"));
+        var script = Assert.Single(page.QuerySelectorAll("script[src='_framework/blazor.web.js']"));
 
         using var response = await client.GetAsync(script.GetAttribute("src"));
 
@@ -43,7 +43,18 @@ public sealed class BlazorStartupTests
         Assert.Contains("javascript", resizerResponse.Content.Headers.ContentType?.MediaType ?? "");
 
         var fontPreloads = page.QuerySelectorAll("link[rel='preload'][as='font']");
-        Assert.Equal(2, fontPreloads.Length);
+        Assert.Single(fontPreloads);
+        Assert.Equal("light dark", page.QuerySelector("meta[name='color-scheme']")?.GetAttribute("content"));
+        Assert.Equal(2, page.QuerySelectorAll("meta[name='theme-color'][media]").Length);
+        var themeScript = page.QuerySelector("head script[src='js/theme.js']");
+        Assert.NotNull(themeScript);
+        using var themeScriptResponse = await client.GetAsync(themeScript.GetAttribute("src"));
+        Assert.Equal(HttpStatusCode.OK, themeScriptResponse.StatusCode);
+        Assert.Equal("(prefers-color-scheme: dark)", page.QuerySelector("#dark-theme")?.GetAttribute("media"));
+        using var darkThemeResponse = await client.GetAsync("themes/dark.css");
+        Assert.Equal(HttpStatusCode.OK, darkThemeResponse.StatusCode);
+        Assert.Equal(new[] { "system", "light", "dark" }, page.QuerySelectorAll("#appearance-mode option")
+            .Select(option => option.GetAttribute("value")).ToArray());
         foreach (var preload in fontPreloads)
         {
             var path = preload.GetAttribute("href")!;

@@ -1,4 +1,4 @@
-<aside id="screening-details" class="screening-details" aria-label="Screening details" aria-live="polite">
+<section id="screening-details" class="screening-details" aria-label="Screening details" aria-live="polite">
     <div class="details-heading">
         <p class="details-kicker">@Screening.StartText · @Screening.Room</p>
         <button class="details-close" type="button" aria-label="Close screening details" @onclick="OnScreeningClosed">
@@ -30,7 +30,7 @@
         <p class="booking-unavailable">Booking link unavailable.</p>
     }
     <FilmAbout Info="Screening.FilmInfo" />
-</aside>
+</section>
 
 @code {
     [Parameter, EditorRequired]

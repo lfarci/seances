@@ -6,14 +6,6 @@
     src: url("fonts/source-sans-3-latin-wght-normal.woff2") format("woff2");
 }
 
-@font-face {
-    font-family: "Source Serif 4";
-    font-style: normal;
-    font-weight: 200 900;
-    font-display: swap;
-    src: url("fonts/source-serif-4-latin-wght-normal.woff2") format("woff2");
-}
-
 :root {
     color-scheme: light;
     font-family: var(--font-ui);
@@ -24,27 +16,54 @@
     line-height: 1.45;
 
     --font-ui: "Source Sans 3", system-ui, sans-serif;
-    --font-display: "Source Serif 4", Georgia, serif;
-    --canvas: #f7f4ef;
-    --ink: #26211d;
-    --muted: #51473e;
-    --paper: #fffefa;
-    --line: #c5b9ab;
-    --control-line: #7c6d60;
-    --card-line: #958575;
-    --row-alternate: #efe8df;
-    --time-header: #e4d9cb;
-    --details-paper: #f5f0e9;
-    --hover: #f7eae5;
-    --accent: #762c27;
-    --accent-dark: #56201c;
-    --accent-soft: #ead4cc;
-    --focus: #175c9e;
+    --font-display: var(--font-ui);
+    --canvas: #f3f7f8;
+    --ink: #142329;
+    --muted: #354e5a;
+    --paper: #ffffff;
+    --line: #97adb8;
+    --control-line: #546e79;
+    --card-line: #5d7782;
+    --scrollbar-thumb: #607d88;
+    --row-alternate: #dce8ed;
+    --time-header: #cadfe5;
+    --room-header: #e4edf1;
+    --room-header-alternate: #d4e2e8;
+    --details-paper: #e8f2f4;
+    --hover: #e4f3ef;
+    --accent: #006b64;
+    --accent-dark: #004d48;
+    --accent-soft: #d5eee8;
+    --on-accent: #ffffff;
+    --focus: #1646a0;
+    --notice-line: #93652b;
+    --notice-paper: #fff5e4;
+    --notice-ink: #614117;
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7'%3E%3Cpath d='M1 1.25 6 5.75 11 1.25' fill='none' stroke='%23546e79' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --radius-section: 1.5rem;
+    --radius-card: .875rem;
+    --radius-control: 1rem;
+    --canvas-glow: rgb(0 107 100 / .22);
+    --canvas-glow-secondary: rgb(0 107 100 / .1);
+    --panel-shadow: 0 .75rem 2rem -.75rem rgb(20 35 41 / .16), 0 .25rem 2.5rem -.5rem rgb(0 107 100 / .18);
+    --selection-glow: 0 .25rem 1.25rem -.25rem rgb(0 107 100 / .38);
+    --surface-edge: inset 0 1px 0 rgb(255 255 255 / .95), inset 1px 0 0 rgb(255 255 255 / .6), inset 0 -1px 0 rgb(0 107 100 / .1);
+    --glass-panel: rgb(248 250 252 / .8);
+    --glass-details: rgb(232 242 244 / .9);
+    --glass-sheen: rgb(255 255 255 / .8);
+    --control-sheen: rgb(255 255 255 / .65);
+    --action-sheen: rgb(255 255 255 / .06);
+    --header-shadow: inset 0 1px 0 rgb(255 255 255 / .95), 0 .25rem .625rem -.375rem rgb(20 35 41 / .4);
+    --rail-shadow: inset 0 1px 0 rgb(255 255 255 / .85), inset -1px 0 0 rgb(255 255 255 / .55), .375rem 0 .75rem -.5rem rgb(20 35 41 / .3);
+    --card-shadow: 0 .0625rem .1875rem rgb(20 35 41 / .16), 0 .25rem .625rem -.25rem rgb(20 35 41 / .3), 0 .625rem 1.25rem -.5rem rgb(0 107 100 / .16);
+    --card-shadow-hover: 0 .125rem .25rem rgb(20 35 41 / .18), 0 .375rem .875rem -.3125rem rgb(20 35 41 / .34), 0 .875rem 1.75rem -.625rem rgb(0 107 100 / .22);
+    --control-shadow: 0 .125rem .25rem rgb(20 35 41 / .09);
+    --lane-shadow: inset 0 .125rem .25rem rgb(20 35 41 / .08);
 }
 
 ::selection {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
 }
 
 * {
@@ -52,8 +71,11 @@
 }
 
 body {
-    min-width: 20rem;
+    min-width: 0;
     margin: 0;
+    background:
+        radial-gradient(ellipse at 90% 0, var(--canvas-glow), transparent 55%),
+        radial-gradient(ellipse at 0 85%, var(--canvas-glow-secondary), transparent 50%);
 }
 
 main {
@@ -73,14 +95,14 @@ h1 {
     margin-bottom: .45rem;
     font-family: var(--font-display);
     font-size: clamp(2.25rem, 5vw, 3.5rem);
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: -.025em;
     line-height: 1.08;
 }
 
 h2 {
     margin-bottom: .35rem;
-    font: 500 1.75rem/1.2 var(--font-display);
+    font: 650 1.75rem/1.2 var(--font-display);
 }
 
 .intro {
@@ -90,11 +112,31 @@ h2 {
     line-height: 1.5;
 }
 
+.page-heading {
+    margin-bottom: 1.5rem;
+}
+
+.page-heading .intro {
+    margin-bottom: 1rem;
+}
+
+.theme-picker {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    width: max-content;
+    max-width: 100%;
+    margin-inline-start: auto;
+    font-size: .875rem;
+}
+
+.theme-picker select {
+    width: 8.5rem;
+    font-size: 1rem;
+}
+
 .schedule {
-    padding: 1.5rem;
-    border: 1px solid var(--line);
-    border-radius: .8rem;
-    background: var(--paper);
+    min-width: 0;
 }
 
 .schedule-toolbar {
@@ -149,10 +191,13 @@ h2 {
     min-width: 2.75rem;
     padding: .45rem .65rem;
     border: 1px solid var(--control-line);
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     color: var(--accent-dark);
+    background: var(--paper);
     font-weight: 650;
     text-decoration: none;
+    background-image: linear-gradient(180deg, var(--control-sheen), transparent 65%);
+    box-shadow: var(--surface-edge), var(--control-shadow);
 }
 
 .date-step svg {
@@ -168,6 +213,8 @@ h2 {
 .date-today[aria-current="date"] {
     border-color: var(--accent);
     background: var(--accent-soft);
+    text-decoration: underline;
+    text-underline-offset: .2em;
 }
 
 a.date-step:hover {
@@ -178,6 +225,7 @@ a.date-step:hover {
     color: var(--muted);
     border-color: var(--line);
     background: var(--row-alternate);
+    border-style: dashed;
 }
 
 .filter-form {
@@ -207,16 +255,26 @@ button {
     min-height: 2.75rem;
     padding: .55rem .75rem;
     border: 1px solid var(--control-line);
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     background: var(--paper);
     color: var(--ink);
     font: inherit;
 }
 
+select {
+    appearance: none;
+    padding-right: 2.25rem;
+    background-image: var(--select-arrow), linear-gradient(180deg, var(--control-sheen), transparent 65%);
+    background-repeat: no-repeat;
+    background-position: right .75rem center, 0 0;
+    background-size: .875rem .5rem, 100% 100%;
+    box-shadow: var(--surface-edge), var(--control-shadow);
+}
+
 button {
     border-color: var(--accent);
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     font-weight: 700;
     cursor: pointer;
 }
@@ -231,6 +289,14 @@ button:hover {
     outline-offset: 3px;
 }
 
+a {
+    text-underline-offset: .2em;
+}
+
+select:hover {
+    border-color: var(--accent);
+}
+
 .freshness {
     margin: 0;
     font-size: .9rem;
@@ -239,10 +305,10 @@ button:hover {
 .notice,
 .empty-state {
     padding: 1rem 1.1rem;
-    border: 1px solid #b98b54;
+    border: 1px solid var(--notice-line);
     border-radius: .45rem;
-    background: #fff7e9;
-    color: #382719;
+    background: var(--notice-paper);
+    color: var(--notice-ink);
     line-height: 1.5;
 }
 
@@ -258,13 +324,70 @@ button:hover {
 .room-calendar {
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: .65rem;
+    border-radius: var(--radius-section);
+    background: var(--paper);
+    box-shadow: var(--surface-edge), var(--panel-shadow);
 }
 
 .calendar-scroll {
     max-height: 68vh;
     overflow: auto;
-    scrollbar-color: var(--control-line) var(--row-alternate);
+    scroll-padding: 4.25rem .5rem .5rem 8rem;
+}
+
+.calendar-scroll,
+.screening-details {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+    scrollbar-gutter: stable;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    .calendar-scroll,
+    .screening-details {
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar {
+        width: .625rem;
+        height: .625rem;
+        background: transparent;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-track-piece {
+        background: transparent;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-thumb {
+        border: .125rem solid transparent;
+        border-radius: 999px;
+        background: var(--scrollbar-thumb);
+        background-clip: padding-box;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-thumb:hover {
+        background-color: var(--accent);
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-track {
+        margin: var(--radius-section);
+        background: transparent;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-button {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+}
+
+.calendar-scroll:focus-visible {
+    outline-offset: -3px;
 }
 
 .calendar-workspace {
@@ -286,7 +409,7 @@ button:hover {
     --room-lane-height: 6.5rem;
     display: grid;
     grid-template-columns: 7.5rem minmax(0, 1fr);
-    grid-template-rows: 3rem;
+    grid-template-rows: 4rem;
     width: 100%;
     min-width: calc(7.5rem + var(--timeline-width) + 2rem);
 }
@@ -307,7 +430,7 @@ button:hover {
     background: var(--time-header);
     color: var(--ink);
     font-size: 1rem;
-    font-weight: 650;
+    font-weight: 700;
     text-align: left;
 }
 
@@ -317,29 +440,69 @@ button:hover {
     z-index: 3;
     top: 0;
     background: var(--time-header);
+    background-image: linear-gradient(180deg, var(--control-sheen), transparent 75%);
+    border-bottom: 1px solid var(--control-line);
+    box-shadow: var(--header-shadow);
 }
 
 .time-heading {
     z-index: 4;
     left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: .125rem;
+    padding: .625rem .875rem;
+    border-right: 1px solid var(--line);
+}
+
+.axis-caption {
+    color: var(--muted);
+    font-size: .875rem;
+    font-weight: 600;
 }
 
 .room-heading {
     left: 0;
     display: flex;
     align-items: center;
-    background: var(--paper);
+    padding: .75rem .875rem;
+    background: var(--room-header);
+    background-image: linear-gradient(160deg, var(--control-sheen), transparent 70%);
+    border-right: 1px solid var(--line);
+    box-shadow: var(--rail-shadow);
 }
 
 .time-cell {
     position: absolute;
-    top: .75rem;
+    top: 0;
+    height: 100%;
+    padding-top: .875rem;
     transform: translateX(-50%);
-    color: var(--accent-dark);
-    font-size: .875rem;
+    color: var(--ink);
+    font-size: 1rem;
     font-variant-numeric: tabular-nums;
-    font-weight: 650;
+    font-weight: 700;
     white-space: nowrap;
+}
+
+.time-cell::after {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: .75rem;
+    border-left: 1px solid var(--control-line);
+    content: "";
+}
+
+.time-cell.is-half-hour::after {
+    height: .375rem;
+}
+
+.time-cell.is-half-hour {
+    width: 0;
+    font-size: 0;
 }
 
 .time-cell:first-child {
@@ -347,16 +510,24 @@ button:hover {
     transform: none;
 }
 
+.time-cell:first-child::after {
+    left: 0;
+}
+
 .room-track {
     position: relative;
     min-width: 0;
     height: calc(var(--lane-count) * var(--room-lane-height));
     background: var(--paper);
+    box-shadow: var(--lane-shadow);
 }
 
-.room-heading:nth-of-type(even),
 .room-track:nth-of-type(even) {
-    background: var(--row-alternate);
+    background-color: var(--row-alternate);
+}
+
+.room-heading:nth-of-type(even) {
+    background-color: var(--room-header-alternate);
 }
 
 .calendar-block {
@@ -383,7 +554,7 @@ button:hover {
 .showing-language {
     flex-shrink: 0;
     padding: .0625rem .375rem;
-    border: 1px solid var(--line);
+    border: 1px solid var(--control-line);
     border-radius: .25rem;
     color: var(--muted);
     font-size: .8125rem;
@@ -402,22 +573,27 @@ button:hover {
     padding: .625rem .75rem;
     overflow: hidden;
     border: 1px solid var(--card-line);
-    border-radius: .45rem;
+    border-radius: var(--radius-card);
     background: var(--paper);
     color: var(--ink);
     text-align: left;
     cursor: pointer;
-    transition: border-color .16s ease, background-color .16s ease;
+    transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+    background-image: linear-gradient(160deg, var(--control-sheen), transparent 55%);
+    box-shadow: var(--surface-edge), var(--card-shadow);
 }
 
 .showing:hover {
     border-color: var(--accent);
     background: var(--hover);
+    background-image: linear-gradient(160deg, var(--control-sheen), transparent 55%);
+    box-shadow: var(--surface-edge), var(--card-shadow-hover);
 }
 
 .showing:focus-visible {
     position: relative;
     z-index: 1;
+    outline-offset: -4px;
 }
 
 .showing[aria-pressed="true"],
@@ -428,22 +604,28 @@ button:hover {
 }
 
 .showing[aria-pressed="true"] {
-    border-color: var(--accent-dark);
+    border-color: var(--accent);
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
+    background-image: linear-gradient(160deg, var(--action-sheen), transparent 60%);
+    box-shadow: var(--surface-edge), var(--selection-glow);
+}
+
+.showing[aria-pressed="true"]:focus-visible {
+    outline-color: var(--on-accent);
 }
 
 .showing.is-same-film,
 .mobile-showing.is-same-film {
     border-color: var(--accent);
     background: var(--accent-soft);
-    box-shadow: inset 0 0 0 1px var(--accent);
+    border-style: dashed;
 }
 
 .showing.is-same-film:hover,
 .mobile-showing.is-same-film:hover {
     border-color: var(--accent-dark);
-    box-shadow: inset 0 0 0 1px var(--accent-dark);
+    border-style: dashed;
 }
 
 .showing[aria-pressed="true"] .showing-start,
@@ -452,7 +634,19 @@ button:hover {
 }
 
 .showing[aria-pressed="true"] .showing-language {
-    border-color: rgb(255 255 255 / .6);
+    border-color: currentColor;
+}
+
+.selection-mark {
+    width: 1em;
+    height: 1em;
+    margin-right: .25em;
+    vertical-align: -.1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .showing-title {
@@ -501,13 +695,30 @@ button:hover {
     min-height: 0;
     padding: 1.25rem;
     border: 1px solid var(--line);
-    border-radius: .65rem;
+    border-radius: var(--radius-section);
     background: var(--details-paper);
+    box-shadow: var(--surface-edge), var(--panel-shadow);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .room-calendar,
+    .screening-details {
+        -webkit-backdrop-filter: blur(24px) saturate(125%);
+        backdrop-filter: blur(24px) saturate(125%);
+    }
+
+    .room-calendar {
+        background: linear-gradient(135deg, var(--glass-sheen), transparent 30%), var(--glass-panel);
+    }
+
+    .screening-details {
+        background: linear-gradient(135deg, var(--glass-sheen), transparent 30%), var(--glass-details);
+    }
 }
 
 .details-heading {
     position: relative;
-    padding: 0 2rem 1.1rem 0;
+    padding: 0 2.75rem 1.1rem 0;
     border-bottom: 1px solid var(--line);
 }
 
@@ -536,13 +747,15 @@ button:hover {
     top: -.35rem;
     right: -.35rem;
     display: grid;
-    width: 2.5rem;
-    min-height: 2.5rem;
+    width: 2.75rem;
+    min-height: 2.75rem;
     place-items: center;
     padding: .55rem;
     border: 1px solid var(--control-line);
     background: var(--paper);
     color: var(--ink);
+    background-image: linear-gradient(180deg, var(--control-sheen), transparent 65%);
+    box-shadow: var(--surface-edge), var(--control-shadow);
 }
 
 .details-close:hover {
@@ -600,11 +813,13 @@ button:hover {
     min-height: 2.75rem;
     align-items: center;
     padding: .55rem .8rem;
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     background: var(--accent);
-    color: white;
+    color: var(--on-accent);
     font-weight: 700;
     text-decoration: none;
+    background-image: linear-gradient(160deg, var(--action-sheen), transparent 60%);
+    box-shadow: var(--surface-edge), var(--selection-glow);
 }
 
 .booking-link:hover {
@@ -624,7 +839,6 @@ button:hover {
     border-radius: .35rem;
     background: var(--time-header);
     object-fit: cover;
-    box-shadow: 0 .35rem .9rem rgb(38 33 29 / .18);
 }
 
 .film-links {
@@ -643,7 +857,7 @@ button:hover {
     gap: .5rem;
     padding: .45rem .7rem;
     border: 1px solid var(--control-line);
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     background: var(--paper);
     color: var(--accent-dark);
     font-weight: 700;
@@ -665,7 +879,7 @@ button:hover {
 }
 
 .film-link-icon .play {
-    fill: #fff;
+    fill: var(--on-accent);
 }
 
 .imdb-badge {
@@ -741,6 +955,7 @@ button:hover {
         flex-wrap: wrap;
         align-items: baseline;
         gap: .5rem 1rem;
+        margin-bottom: 0;
     }
 
     .page-heading h1 {
@@ -758,7 +973,6 @@ button:hover {
         flex: 1;
         flex-direction: column;
         min-height: 0;
-        padding: 1rem;
     }
 
     .schedule > :not(.calendar-workspace) {
@@ -856,10 +1070,6 @@ button:hover {
     main {
         width: min(100% - 2rem, 42rem);
         padding-top: 2rem;
-    }
-
-    .schedule {
-        padding: 1rem;
     }
 
     .schedule-toolbar {
@@ -981,12 +1191,78 @@ button:hover {
         width: min(100% - 1.25rem, 42rem);
     }
 
-    .schedule {
-        padding: .8rem;
-    }
-
     .mobile-showing {
         grid-template-columns: 4.4rem 1fr;
         column-gap: .65rem;
+    }
+}
+
+@media (max-width: 22rem) {
+    .date-navigation {
+        display: grid;
+        grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    }
+
+    .date-filter .date-navigation select {
+        width: 100%;
+    }
+
+    .date-today {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+    body {
+        background: var(--canvas);
+    }
+
+    .room-calendar,
+    .screening-details {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: var(--paper);
+        box-shadow: none;
+    }
+
+    .screening-details {
+        background: var(--details-paper);
+    }
+
+    select,
+    .date-step,
+    .time-axis,
+    .time-heading,
+    .room-heading,
+    .room-track,
+    .showing,
+    .showing:hover,
+    .showing[aria-pressed="true"],
+    .details-close,
+    .details-close:hover,
+    .screening-details .booking-link {
+        background-image: none;
+        box-shadow: none;
+    }
+
+    select {
+        appearance: auto;
+        padding-right: .75rem;
+    }
+}
+
+@media (forced-colors: active) {
+    .calendar-scroll,
+    .screening-details {
+        scrollbar-color: auto;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-thumb {
+        background-color: CanvasText;
+    }
+
+    :is(.calendar-scroll, .screening-details)::-webkit-scrollbar-thumb:hover {
+        background-color: Highlight;
     }
 }

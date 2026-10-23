@@ -1,7 +1,8 @@
 # Local fonts
 
-Source Sans 3 is used for calendar titles, times, controls, and supporting text.
-Source Serif 4 is reserved for page, cinema, and screening-detail headings.
+Source Sans 3 is used throughout the interface, including headings, calendar
+titles, times, controls, and supporting text. It is the only preloaded font.
+Source Serif 4 is retained as a legacy asset but is not loaded by the interface.
 
 The Latin variable WOFF2 files are from Fontsource packages version 5.2.8:
 
