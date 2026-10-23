@@ -3,9 +3,11 @@ name: Séances
 description: Clear cultural wayfinding for Brussels cinema schedules.
 colors:
   canvas: "#f3f7f8"
+  canvas-glow: "rgb(0 107 100 / .06)"
   ink: "#142329"
   muted: "#465c65"
   paper: "#ffffff"
+  panel: "#f8fafc"
   line: "#bdcdd2"
   control-line: "#667f88"
   card-line: "#6d8790"
@@ -21,16 +23,18 @@ colors:
   notice-line: "#93652b"
   notice-paper: "#fff5e4"
   notice-ink: "#614117"
-  dark-canvas: "#101c22"
+  dark-canvas: "#1b1d29"
+  dark-canvas-glow: "rgb(103 217 201 / .055)"
   dark-ink: "#edf5f6"
   dark-muted: "#b5c8ce"
-  dark-paper: "#16272e"
-  dark-line: "#48616b"
+  dark-paper: "#292d3d"
+  dark-panel: "#222533"
+  dark-line: "#505a70"
   dark-control-line: "#819da7"
   dark-card-line: "#78949e"
-  dark-row-alternate: "#1d323b"
-  dark-time-header: "#263e47"
-  dark-details-paper: "#1b3037"
+  dark-row-alternate: "#242838"
+  dark-time-header: "#30374a"
+  dark-details-paper: "#262b3b"
   dark-hover: "#23453f"
   dark-accent: "#67d9c9"
   dark-accent-dark: "#a9f5e8"
@@ -126,11 +130,12 @@ rounded:
   resizer-grip: "1px"
   brand: ".2rem"
   language: ".25rem"
-  action: ".35rem"
-  control: ".45rem"
-  screening: ".5rem"
-  subpanel: ".65rem"
-  panel: ".75rem"
+  poster-resizer: ".35rem"
+  notice: ".45rem"
+  control: ".625rem"
+  screening: ".875rem"
+  subpanel: "1.125rem"
+  panel: "1.5rem"
 spacing:
   metadata: ".2rem"
   xs: ".25rem"
@@ -160,7 +165,7 @@ components:
     rounded: "{rounded.control}"
     padding: ".55rem .75rem"
   date-navigation:
-    rounded: "{rounded.action}"
+    rounded: "{rounded.control}"
     padding: ".45rem .65rem"
     textColor: "{colors.accent-dark}"
   language-tag:
@@ -182,7 +187,7 @@ components:
   booking-link:
     backgroundColor: "{colors.accent}"
     textColor: "{colors.on-accent}"
-    rounded: "{rounded.action}"
+    rounded: "{rounded.control}"
     padding: ".55rem .8rem"
 ---
 
@@ -194,12 +199,14 @@ components:
 
 Séances is a clear, task-focused schedule reader. Mineral surfaces, strong control borders, teal active states, and open sans-serif typography help visitors scan cinema, service date, room, and start time without decorative cinema-poster treatment.
 
-This approved system replaces the cream, burgundy, and serif identity while preserving the existing workspace. Appearance follows the device: pale mineral and white in light mode; blue-black mineral, pale text, and mint-teal in dark mode. Selection links a screening to its details without confusing selection with keyboard focus.
+This approved system replaces the cream, burgundy, and serif identity while preserving the existing workspace. Appearance follows the device: pale mineral and white in light mode; layered dark slate, pale text, and mint-teal in dark mode. Selection links a screening to its details without confusing selection with keyboard focus.
+
+The OpenCode Desktop reference informs a small polish pass, not a new identity: larger section corners, a quiet canvas wash, and bounded soft glows retain teal and the existing layout and theme behavior.
 
 **Key Characteristics:**
 - Mineral surfaces and teal emphasis, coordinated across device light and dark modes.
 - Source Sans 3 throughout the interface, with an isolated IMDb brand badge exception.
-- Flat, bordered grouping with a compact timeline and chronological phone list.
+- Rounded, bordered grouping with soft elevation, a compact timeline, and a chronological phone list.
 - Check-marked selection, dashed same-film treatment, and independently visible focus.
 
 Implementation evidence: `src/Seances.Presentation.Web/wwwroot/app.css` and the Razor components under `Components/Schedule`, with font loading in `Components/App.razor`. Automated axe checks and palette contrast tests are evidence only; they do not establish full WCAG conformance. The product has no agreed conformance level.
@@ -216,7 +223,7 @@ The sidecar's representative tonal ramps are synthesized OKLCH preview strips, n
 
 ### Neutral
 
-Mineral Canvas surrounds Paper reading surfaces. Ink and Muted distinguish primary and supporting text without opacity. Alternate Room and Time Header establish rows and the sticky axis; Details Paper distinguishes the reading section. Line groups surfaces, while Control Line and Card Line provide stronger interactive boundaries. Hover is a separate soft teal surface.
+Mineral Canvas surrounds a layered Panel schedule surface and Paper reading surfaces. Dark mode uses slate layers rather than blue-black mineral. Ink and Muted distinguish primary and supporting text without opacity. Alternate Room and Time Header establish rows and the sticky axis; Details Paper distinguishes the reading section. Line groups surfaces, while Control Line and Card Line provide stronger interactive boundaries with greater than 3:1 control contrast. Hover is a separate soft teal surface; foregrounds and teal accents remain unchanged by this polish.
 
 ### Functional and brand exceptions
 
@@ -261,19 +268,21 @@ Spacing is compact and functional, predominantly quarter-rem increments with fin
 
 ## Elevation & Depth
 
-There are no box shadows. Borders, alternating surfaces, sticky layering, and an opaque details drawer establish depth. The mobile drawer sits at z-index 10 without an added scrim. Timeline headers use z-indices 2–4; focused cards rise locally to 1 so their indicator remains visible.
+Borders and tonal layering remain structural; soft elevation adds restrained decoration. The body uses a static radial wash (`--canvas-glow`, ellipse at 85% 0 fading to transparent at 60%). Schedule and details combine an inset highlight (`--surface-edge`) with the paired `--panel-shadow`; selected desktop cards and the booking action use `--selection-glow`. Exact light/dark shadow values are recorded in the sidecar. There is no backdrop blur or new motion, and glow never replaces focus or state indicators.
 
-**The Flat Grouping Rule.** Use borders and tonal surfaces for grouping, not a new default shadow treatment.
+The opaque mobile drawer sits at z-index 10 without an added scrim. Timeline headers use z-indices 2–4; focused cards rise locally to 1 so their indicator remains visible.
+
+**The Bounded Soft-Elevation Rule.** Keep panel shadows and edge highlights on schedule and details, and selection glow on selected desktop cards and the booking action; retain borders, visible focus, selection checks, and dashed same-film cues.
 
 ## Shapes
 
-The frontmatter radius vocabulary records all actual values: square mobile rows; the one-pixel divider grip; compact brand and language corners; action/poster corners; select/button/notice corners; screening cards; calendar/details subpanels; and the outer schedule panel. Do not collapse these to the stale single control radius. Borders are generally 1px. Same-film cards use dashed outlines; disabled date navigation uses a dashed boundary. Check marks and arrow/close icons are inline SVG, not glyph icons.
+The frontmatter radius vocabulary records all actual values. The four shared CSS tokens are `--radius-panel` (outer schedule), `--radius-section` (calendar/details), `--radius-card` (screenings), and `--radius-control` (native controls, date navigation, booking, and film links), mapped to panel, subpanel, screening, and control respectively. Square mobile rows, the one-pixel divider grip, compact brand/language corners, poster/resizer corners, and notice corners retain their original sizes. Borders are generally 1px. Same-film cards use dashed outlines; disabled date navigation uses a dashed boundary. Check marks and arrow/close icons are inline SVG, not glyph icons.
 
 ## Components
 
 ### Buttons
 
-Primary buttons use paired accent colors and the control radius. Their minimum height is 2.75rem (the frontmatter height is the target, not a fixed CSS height). Booking links use the smaller action radius and their own inline padding. Close controls use a paper background, strong border, a 2.75rem square target, and a soft accent hover. Timeline cards deliberately override the generic button minimum height.
+Primary buttons use paired accent colors and the control radius. Their minimum height is 2.75rem (the frontmatter height is the target, not a fixed CSS height). Booking links share the control radius, use their own inline padding, and carry selection glow. Close controls use a paper background, strong border, a 2.75rem square target, and a soft accent hover. Timeline cards deliberately override the generic button minimum height.
 
 Global keyboard focus is a 3px outline with 3px offset. The timeline scroll region uses a -3px inset; timeline cards use -4px so overflow cannot clip focus. Selected timeline cards use `on-accent` for the outline, keeping it distinct on the active fill. Other controls retain the dedicated focus color.
 
@@ -291,11 +300,11 @@ Language versions are compact outlined metadata tags, not interactive filters. T
 
 ### Cards / Containers
 
-Screening cards use strong card borders, paper surfaces, and compact padding. Hover uses the dedicated hover surface. Selected desktop cards use solid accent with paired text; mobile selection uses a soft fill and emphasis text. Both include an SVG check and `aria-pressed`. Other screenings of the same film use soft fill plus a dashed border and an explanatory accessible name, not the selected check. On mobile the dashed styling applies to the row's existing bottom border, not a newly enclosed card.
+Screening cards use strong card borders, paper surfaces, and compact padding. Hover uses the dedicated hover surface. Selected desktop cards use solid accent with paired text and selection glow; mobile selection retains a soft fill and emphasis text without glow. Both include an SVG check and `aria-pressed`. Other screenings of the same film use soft fill plus a dashed border and an explanatory accessible name, not the selected check. On mobile the dashed styling applies to the row's existing bottom border, not a newly enclosed card.
 
 The details pane is a labeled `section` (`Screening details`, polite live updates), not an `aside`. It holds actual start/room information, a film heading, version, optional poster and external links, runtime/finish data, booking availability, and film information. Its close control is visibly separate from the content. Posters retain their 2:3 ratio, existing URLs, and alternative text; this redesign ships no raster changes.
 
-Film links have outlined action styling and a 2.75rem minimum height. The IMDb badge alone uses the fixed brand palette and brand type. TMDB attribution remains compact supporting text with an underlined link. Notices and empty states use the coordinated notice palette and the control radius.
+Film links have outlined action styling, the control radius, and a 2.75rem minimum height. The IMDb badge alone uses the fixed brand palette and brand type. TMDB attribution remains compact supporting text with an underlined link. Notices and empty states use the coordinated notice palette and retain the smaller notice radius.
 
 ### Schedule
 
@@ -313,4 +322,4 @@ Timeline cards show start, language, and title; version/format metadata is hidde
 - **Don't** reintroduce cream/burgundy surfaces or the unused serif face as the current identity.
 - **Don't** replace selection, focus, or same-film distinctions with color alone.
 - **Don't** infer full WCAG conformance from axe results, contrast tests, or this document.
-- **Don't** add default shadows or change snapshot/raster assets as part of documenting the system.
+- **Don't** spread glow to every control, add backdrop blur or animated glow, or change snapshot/raster assets as part of documenting the system.

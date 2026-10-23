@@ -20,7 +20,7 @@ function contrast(first, second) {
 for (const [index, palette] of palettes.entries()) {
     const theme = index === 0 ? "light" : "dark";
     test(`${theme} reading and action colors retain WCAG AA text contrast`, () => {
-        for (const surface of ["canvas", "paper", "row-alternate", "time-header", "details-paper", "hover", "accent-soft"]) {
+        for (const surface of ["canvas", "panel", "paper", "row-alternate", "time-header", "details-paper", "hover", "accent-soft"]) {
             for (const text of ["ink", "muted", "accent-dark"]) {
                 const ratio = contrast(palette[text], palette[surface]);
                 assert.ok(ratio >= 4.5, `${text} on ${surface}: ${ratio.toFixed(2)}:1`);

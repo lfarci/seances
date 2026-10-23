@@ -21,6 +21,7 @@
     --ink: #142329;
     --muted: #465c65;
     --paper: #ffffff;
+    --panel: #f8fafc;
     --line: #bdcdd2;
     --control-line: #667f88;
     --card-line: #6d8790;
@@ -36,20 +37,29 @@
     --notice-line: #93652b;
     --notice-paper: #fff5e4;
     --notice-ink: #614117;
+    --radius-panel: 1.5rem;
+    --radius-section: 1.125rem;
+    --radius-card: .875rem;
+    --radius-control: .625rem;
+    --canvas-glow: rgb(0 107 100 / .06);
+    --panel-shadow: 0 .5rem 1.75rem -.75rem rgb(20 35 41 / .13), 0 .25rem 2rem -.75rem rgb(0 107 100 / .1);
+    --selection-glow: 0 .25rem 1rem -.25rem rgb(0 107 100 / .28);
+    --surface-edge: inset 0 1px 0 rgb(255 255 255 / .8);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --canvas: #101c22;
+        --canvas: #1b1d29;
         --ink: #edf5f6;
         --muted: #b5c8ce;
-        --paper: #16272e;
-        --line: #48616b;
+        --paper: #292d3d;
+        --panel: #222533;
+        --line: #505a70;
         --control-line: #819da7;
         --card-line: #78949e;
-        --row-alternate: #1d323b;
-        --time-header: #263e47;
-        --details-paper: #1b3037;
+        --row-alternate: #242838;
+        --time-header: #30374a;
+        --details-paper: #262b3b;
         --hover: #23453f;
         --accent: #67d9c9;
         --accent-dark: #a9f5e8;
@@ -59,6 +69,10 @@
         --notice-line: #cda15d;
         --notice-paper: #382d1d;
         --notice-ink: #f6d9aa;
+        --canvas-glow: rgb(103 217 201 / .055);
+        --panel-shadow: 0 .75rem 2rem -.75rem rgb(0 0 0 / .38), 0 .25rem 2rem -.75rem rgb(103 217 201 / .08);
+        --selection-glow: 0 .25rem 1.125rem -.25rem rgb(103 217 201 / .3);
+        --surface-edge: inset 0 1px 0 rgb(255 255 255 / .045);
     }
 }
 
@@ -74,6 +88,7 @@
 body {
     min-width: 20rem;
     margin: 0;
+    background: radial-gradient(ellipse at 85% 0, var(--canvas-glow), transparent 60%);
 }
 
 main {
@@ -113,8 +128,9 @@ h2 {
 .schedule {
     padding: 1.5rem;
     border: 1px solid var(--line);
-    border-radius: .75rem;
-    background: var(--paper);
+    border-radius: var(--radius-panel);
+    background: var(--panel);
+    box-shadow: var(--surface-edge), var(--panel-shadow);
 }
 
 .schedule-toolbar {
@@ -169,7 +185,7 @@ h2 {
     min-width: 2.75rem;
     padding: .45rem .65rem;
     border: 1px solid var(--control-line);
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     color: var(--accent-dark);
     background: var(--paper);
     font-weight: 650;
@@ -231,7 +247,7 @@ button {
     min-height: 2.75rem;
     padding: .55rem .75rem;
     border: 1px solid var(--control-line);
-    border-radius: .45rem;
+    border-radius: var(--radius-control);
     background: var(--paper);
     color: var(--ink);
     font: inherit;
@@ -290,7 +306,8 @@ select:hover {
 .room-calendar {
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: .65rem;
+    border-radius: var(--radius-section);
+    background: var(--paper);
 }
 
 .calendar-scroll {
@@ -439,7 +456,7 @@ select:hover {
     padding: .625rem .75rem;
     overflow: hidden;
     border: 1px solid var(--card-line);
-    border-radius: .5rem;
+    border-radius: var(--radius-card);
     background: var(--paper);
     color: var(--ink);
     text-align: left;
@@ -469,6 +486,7 @@ select:hover {
     border-color: var(--accent);
     background: var(--accent);
     color: var(--on-accent);
+    box-shadow: var(--selection-glow);
 }
 
 .showing[aria-pressed="true"]:focus-visible {
@@ -555,8 +573,9 @@ select:hover {
     min-height: 0;
     padding: 1.25rem;
     border: 1px solid var(--line);
-    border-radius: .65rem;
+    border-radius: var(--radius-section);
     background: var(--details-paper);
+    box-shadow: var(--surface-edge), var(--panel-shadow);
 }
 
 .details-heading {
@@ -654,11 +673,12 @@ select:hover {
     min-height: 2.75rem;
     align-items: center;
     padding: .55rem .8rem;
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     background: var(--accent);
     color: var(--on-accent);
     font-weight: 700;
     text-decoration: none;
+    box-shadow: var(--selection-glow);
 }
 
 .booking-link:hover {
@@ -696,7 +716,7 @@ select:hover {
     gap: .5rem;
     padding: .45rem .7rem;
     border: 1px solid var(--control-line);
-    border-radius: .35rem;
+    border-radius: var(--radius-control);
     background: var(--paper);
     color: var(--accent-dark);
     font-weight: 700;
