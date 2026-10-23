@@ -3,7 +3,11 @@ name: Séances
 description: Clear cultural wayfinding for Brussels cinema schedules.
 colors:
   canvas: "#f3f7f8"
-  canvas-glow: "rgb(0 107 100 / .06)"
+  canvas-glow: "rgb(0 107 100 / .17)"
+  canvas-glow-secondary: "rgb(0 107 100 / .1)"
+  glass-panel: "rgb(248 250 252 / .8)"
+  glass-details: "rgb(240 247 247 / .94)"
+  glass-sheen: "rgb(255 255 255 / .6)"
   ink: "#142329"
   muted: "#465c65"
   paper: "#ffffff"
@@ -24,7 +28,11 @@ colors:
   notice-paper: "#fff5e4"
   notice-ink: "#614117"
   dark-canvas: "#1b1d29"
-  dark-canvas-glow: "rgb(103 217 201 / .055)"
+  dark-canvas-glow: "rgb(103 217 201 / .18)"
+  dark-canvas-glow-secondary: "rgb(103 217 201 / .1)"
+  dark-glass-panel: "rgb(34 37 51 / .8)"
+  dark-glass-details: "rgb(38 43 59 / .94)"
+  dark-glass-sheen: "rgb(255 255 255 / .065)"
   dark-ink: "#edf5f6"
   dark-muted: "#b5c8ce"
   dark-paper: "#292d3d"
@@ -201,12 +209,12 @@ Séances is a clear, task-focused schedule reader. Mineral surfaces, strong cont
 
 This approved system replaces the cream, burgundy, and serif identity while preserving the existing workspace. Appearance follows the device: pale mineral and white in light mode; layered dark slate, pale text, and mint-teal in dark mode. Selection links a screening to its details without confusing selection with keyboard focus.
 
-The OpenCode Desktop reference informs a small polish pass, not a new identity: larger section corners, a quiet canvas wash, and bounded soft glows retain teal and the existing layout and theme behavior.
+The OpenCode Desktop reference and the request for “more glowy like glass” inform the surface treatment, not a new identity: paired canvas glows, translucent gradient shells, and bounded soft elevation retain teal and the existing layout and theme behavior. Opaque fallbacks preserve reading surfaces when blur is unsupported or transparency or contrast preferences require them.
 
 **Key Characteristics:**
 - Mineral surfaces and teal emphasis, coordinated across device light and dark modes.
 - Source Sans 3 throughout the interface, with an isolated IMDb brand badge exception.
-- Rounded, bordered grouping with soft elevation, a compact timeline, and a chronological phone list.
+- Rounded, bordered glass shells around opaque timeline reading surfaces, with a compact timeline and a chronological phone list.
 - Check-marked selection, dashed same-film treatment, and independently visible focus.
 
 Implementation evidence: `src/Seances.Presentation.Web/wwwroot/app.css` and the Razor components under `Components/Schedule`, with font loading in `Components/App.razor`. Automated axe checks and palette contrast tests are evidence only; they do not establish full WCAG conformance. The product has no agreed conformance level.
@@ -224,6 +232,8 @@ The sidecar's representative tonal ramps are synthesized OKLCH preview strips, n
 ### Neutral
 
 Mineral Canvas surrounds a layered Panel schedule surface and Paper reading surfaces. Dark mode uses slate layers rather than blue-black mineral. Ink and Muted distinguish primary and supporting text without opacity. Alternate Room and Time Header establish rows and the sticky axis; Details Paper distinguishes the reading section. Line groups surfaces, while Control Line and Card Line provide stronger interactive boundaries with greater than 3:1 control contrast. Hover is a separate soft teal surface; foregrounds and teal accents remain unchanged by this polish.
+
+Canvas Glow and Canvas Glow Secondary provide paired ambient teal washes. Glass Panel and Glass Details are translucent shell fills, layered beneath Glass Sheen; Panel and Details Paper remain their opaque fallbacks. These decorative roles have paired dark replacements and do not replace opaque calendar lanes, timeline cards, or controls.
 
 ### Functional and brand exceptions
 
@@ -268,11 +278,13 @@ Spacing is compact and functional, predominantly quarter-rem increments with fin
 
 ## Elevation & Depth
 
-Borders and tonal layering remain structural; soft elevation adds restrained decoration. The body uses a static radial wash (`--canvas-glow`, ellipse at 85% 0 fading to transparent at 60%). Schedule and details combine an inset highlight (`--surface-edge`) with the paired `--panel-shadow`; selected desktop cards and the booking action use `--selection-glow`. Exact light/dark shadow values are recorded in the sidecar. There is no backdrop blur or new motion, and glow never replaces focus or state indicators.
+Borders and tonal layering remain structural; glass and stronger soft glows add bounded decoration. The body uses two static radial washes: `--canvas-glow` at 90% 0 fading to transparent at 55%, and `--canvas-glow-secondary` at 0 85% fading at 50%. Schedule and details combine inset highlights (`--surface-edge`) with paired `--panel-shadow`; selected desktop cards and the booking action use `--selection-glow`. Exact light/dark shadow values are recorded in the sidecar. No new motion is introduced, and glow never replaces focus or state indicators.
 
-The opaque mobile drawer sits at z-index 10 without an added scrim. Timeline headers use z-indices 2–4; focused cards rise locally to 1 so their indicator remains visible.
+Opaque Panel and Details Paper are the baseline. Only when standard or WebKit backdrop filtering is supported do schedule and details receive `blur(24px) saturate(125%)` and a 135-degree Glass Sheen gradient fading to transparent at 45%, over Glass Panel or Glass Details. Calendar lanes, timeline cards, and controls remain opaque. At `max-width: 52rem`, schedule blur is disabled to avoid containing the fixed details drawer; its sheen and translucency remain. The drawer retains supported blur and sits at z-index 10 without an added scrim. Timeline headers use z-indices 2–4; focused cards rise locally to 1 so their indicator remains visible.
 
-**The Bounded Soft-Elevation Rule.** Keep panel shadows and edge highlights on schedule and details, and selection glow on selected desktop cards and the booking action; retain borders, visible focus, selection checks, and dashed same-film cues.
+Under `prefers-reduced-transparency: reduce`, `prefers-contrast: more`, or `forced-colors: active`, remove body washes, backdrop filtering, panel shadows, and selection glow; restore solid Panel and Details Paper backgrounds without sheen.
+
+**The Bounded Glass Rule.** Confine glass shells, panel shadows, and edge highlights to schedule and details, and selection glow to selected desktop cards and the booking action; preserve opaque timeline reading surfaces and controls, solid preference fallbacks, mobile drawer positioning, borders, visible focus, selection checks, and dashed same-film cues.
 
 ## Shapes
 
@@ -322,4 +334,4 @@ Timeline cards show start, language, and title; version/format metadata is hidde
 - **Don't** reintroduce cream/burgundy surfaces or the unused serif face as the current identity.
 - **Don't** replace selection, focus, or same-film distinctions with color alone.
 - **Don't** infer full WCAG conformance from axe results, contrast tests, or this document.
-- **Don't** spread glow to every control, add backdrop blur or animated glow, or change snapshot/raster assets as part of documenting the system.
+- **Don't** spread glass or glow to calendar lanes, timeline cards, or every control, add animated glow, bypass solid preference fallbacks, or change snapshot/raster assets as part of documenting the system.

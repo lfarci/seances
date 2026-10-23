@@ -13,7 +13,7 @@ Mode: Operate. Scope: the existing web schedule, filters, screening cards, and d
 
 THESIS: Clear cultural wayfinding for choosing a screening; no decorative cinema-poster treatment or rearranged workspace.
 
-OWN-WORLD: Mineral canvas, layered reading surfaces, deep teal active states, and Source Sans 3 throughout. Following the user's OpenCode Desktop reference, use generous main-panel radii, smaller rounded screening cards, and soft teal ambient/selection glow. Dark mode uses slate surfaces, pale text, and mint-teal active states. Strong control boundaries and separate focus outlines remain functional; glow is decorative, static, and never the only state cue.
+OWN-WORLD: Mineral canvas, layered reading surfaces, deep teal active states, and Source Sans 3 throughout. Following the user's OpenCode Desktop reference and subsequent explicit glass request, use generous panel radii, translucent schedule/details shells, bounded backdrop blur, luminous rims, and stronger static teal glow. Calendar lanes and controls remain opaque. Dark mode pairs slate glass with mint-teal accents. Keep strong control boundaries and separate focus outlines; provide opaque fallbacks for unsupported blur, reduced transparency, increased contrast, and forced colors.
 
 STORY: Choose a cinema, service date, and optional room; scan start times; select a screening to read details. Selection has both a tonal change and a visible check, with a separate keyboard focus indicator.
 

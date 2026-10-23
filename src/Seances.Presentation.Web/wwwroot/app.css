@@ -41,10 +41,14 @@
     --radius-section: 1.125rem;
     --radius-card: .875rem;
     --radius-control: .625rem;
-    --canvas-glow: rgb(0 107 100 / .06);
-    --panel-shadow: 0 .5rem 1.75rem -.75rem rgb(20 35 41 / .13), 0 .25rem 2rem -.75rem rgb(0 107 100 / .1);
-    --selection-glow: 0 .25rem 1rem -.25rem rgb(0 107 100 / .28);
-    --surface-edge: inset 0 1px 0 rgb(255 255 255 / .8);
+    --canvas-glow: rgb(0 107 100 / .17);
+    --canvas-glow-secondary: rgb(0 107 100 / .1);
+    --panel-shadow: 0 .75rem 2rem -.75rem rgb(20 35 41 / .16), 0 .25rem 2.5rem -.5rem rgb(0 107 100 / .18);
+    --selection-glow: 0 .25rem 1.25rem -.25rem rgb(0 107 100 / .38);
+    --surface-edge: inset 0 1px 0 rgb(255 255 255 / .95), inset 1px 0 0 rgb(255 255 255 / .6);
+    --glass-panel: rgb(248 250 252 / .8);
+    --glass-details: rgb(240 247 247 / .94);
+    --glass-sheen: rgb(255 255 255 / .6);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -69,10 +73,14 @@
         --notice-line: #cda15d;
         --notice-paper: #382d1d;
         --notice-ink: #f6d9aa;
-        --canvas-glow: rgb(103 217 201 / .055);
-        --panel-shadow: 0 .75rem 2rem -.75rem rgb(0 0 0 / .38), 0 .25rem 2rem -.75rem rgb(103 217 201 / .08);
-        --selection-glow: 0 .25rem 1.125rem -.25rem rgb(103 217 201 / .3);
-        --surface-edge: inset 0 1px 0 rgb(255 255 255 / .045);
+        --canvas-glow: rgb(103 217 201 / .18);
+        --canvas-glow-secondary: rgb(103 217 201 / .1);
+        --panel-shadow: 0 .75rem 2rem -.75rem rgb(0 0 0 / .42), 0 .25rem 2.75rem -.5rem rgb(103 217 201 / .18);
+        --selection-glow: 0 .25rem 1.375rem -.25rem rgb(103 217 201 / .42);
+        --surface-edge: inset 0 1px 0 rgb(255 255 255 / .14), inset 1px 0 0 rgb(255 255 255 / .06);
+        --glass-panel: rgb(34 37 51 / .8);
+        --glass-details: rgb(38 43 59 / .94);
+        --glass-sheen: rgb(255 255 255 / .065);
     }
 }
 
@@ -88,7 +96,9 @@
 body {
     min-width: 20rem;
     margin: 0;
-    background: radial-gradient(ellipse at 85% 0, var(--canvas-glow), transparent 60%);
+    background:
+        radial-gradient(ellipse at 90% 0, var(--canvas-glow), transparent 55%),
+        radial-gradient(ellipse at 0 85%, var(--canvas-glow-secondary), transparent 50%);
 }
 
 main {
@@ -578,6 +588,45 @@ select:hover {
     box-shadow: var(--surface-edge), var(--panel-shadow);
 }
 
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .schedule,
+    .screening-details {
+        -webkit-backdrop-filter: blur(24px) saturate(125%);
+        backdrop-filter: blur(24px) saturate(125%);
+    }
+
+    .schedule {
+        background: linear-gradient(135deg, var(--glass-sheen), transparent 45%), var(--glass-panel);
+    }
+
+    .screening-details {
+        background: linear-gradient(135deg, var(--glass-sheen), transparent 45%), var(--glass-details);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+    body {
+        background: var(--canvas);
+    }
+
+    .schedule,
+    .screening-details {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: var(--panel);
+        box-shadow: none;
+    }
+
+    .screening-details {
+        background: var(--details-paper);
+    }
+
+    .showing[aria-pressed="true"],
+    .screening-details .booking-link {
+        box-shadow: none;
+    }
+}
+
 .details-heading {
     position: relative;
     padding: 0 2.75rem 1.1rem 0;
@@ -933,6 +982,9 @@ select:hover {
 
     .schedule {
         padding: 1rem;
+        /* A filtered ancestor would contain the fixed details drawer. */
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
     }
 
     .schedule-toolbar {
